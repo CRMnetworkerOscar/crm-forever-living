@@ -1,0 +1,2358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Forever Living — Mi Negocio</title>
+<style>
+/* ============================================================
+   FOREVER LIVING CRM — Paleta oficial de marca
+   Aloe Gold #FFC600 | Black #000000 | White #FFFFFF
+   Aloe Green #74AA50 | Sky Blue #4C9FC8 | Earth Brown #5D4B3C
+   ============================================================ */
+:root {
+  --gold: #FFC600;
+  --gold-dark: #CC9F00;
+  --gold-light: #FFF8D6;
+  --gold-mid: #FFE066;
+  --black: #111111;
+  --white: #FFFFFF;
+  --green: #74AA50;
+  --green-light: #EBF5E1;
+  --blue: #4C9FC8;
+  --blue-light: #E3F3FB;
+  --brown: #5D4B3C;
+  --red: #C0392B;
+  --red-light: #FDECEA;
+  --bg: #F8F7F2;
+  --surface: #FFFFFF;
+  --border: #E8E4D0;
+  --border-strong: #D4CEB0;
+  --text: #1A1A1A;
+  --text-muted: #777;
+  --text-hint: #AAA;
+  --sidebar-w: 160px;
+  --topbar-h: 52px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--black);
+  display: flex; align-items: center;
+  padding: 0 16px;
+  gap: 14px;
+  z-index: 100;
+  border-bottom: 2px solid var(--gold);
+}
+
+.logo-wrap { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.logo-eagle svg { width: 36px; height: 36px; }
+
+.logo-text {
+  display: flex; flex-direction: column; gap: 1px;
+}
+.logo-forever {
+  color: var(--gold);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  line-height: 1;
+}
+.logo-sub {
+  color: #666;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.topbar-divider {
+  width: 1px; height: 28px;
+  background: #333;
+  flex-shrink: 0;
+}
+
+.topbar-title {
+  color: #999;
+  font-size: 12px;
+  flex: 1;
+  letter-spacing: 0.3px;
+}
+
+.topbar-badge {
+  background: var(--gold);
+  color: var(--black);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+  padding-top: var(--topbar-h);
+  min-height: 100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed;
+  top: var(--topbar-h); left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: #0D0D0D;
+  overflow-y: auto;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section-label {
+  padding: 16px 14px 6px;
+  font-size: 9px;
+  color: #444;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  color: #666;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  user-select: none;
+}
+.nav-item:hover { color: #ccc; background: #161616; }
+.nav-item.active {
+  color: var(--gold);
+  background: #1A1A0A;
+  border-left-color: var(--gold);
+  font-weight: 500;
+}
+.nav-icon { font-size: 14px; flex-shrink: 0; width: 16px; text-align: center; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 8px;
+  min-width: 16px;
+  text-align: center;
+}
+.nav-badge.gold { background: var(--gold); color: var(--black); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 14px;
+  border-top: 1px solid #1A1A1A;
+}
+.sidebar-footer-text {
+  font-size: 9px;
+  color: #333;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* ===== CONTENT ===== */
+.content {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  padding: 20px;
+  min-width: 0;
+}
+
+/* ===== SECTIONS ===== */
+.section { display: none; }
+.section.active { display: block; }
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.page-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+.page-title-bar {
+  width: 4px; height: 20px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  font-family: inherit;
+  letter-spacing: 0.2px;
+}
+.btn-gold {
+  background: var(--gold);
+  color: var(--black);
+}
+.btn-gold:hover { background: var(--gold-dark); }
+.btn-outline {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--text); }
+.btn-danger {
+  background: var(--red-light);
+  color: var(--red);
+  border: 1px solid #f5c6c2;
+}
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.card-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: #FAFAF7;
+}
+.card-header-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.card-body { padding: 16px; }
+
+/* ===== METRIC CARDS ===== */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gold);
+}
+.metric-card.green::before { background: var(--green); }
+.metric-card.red::before { background: var(--red); }
+.metric-card.blue::before { background: var(--blue); }
+.metric-label { font-size: 10px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; }
+.metric-val { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+.metric-val.gold { color: var(--gold-dark); }
+.metric-val.green { color: var(--green); }
+.metric-val.red { color: var(--red); }
+.metric-val.blue { color: var(--blue); }
+.metric-sub { font-size: 10px; color: var(--text-hint); margin-top: 4px; }
+
+/* ===== TABLE ===== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  padding: 8px 12px;
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  background: #FAFAF7;
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #FFFDF0; }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.b-gold { background: var(--gold-light); color: #7A5C00; }
+.b-green { background: var(--green-light); color: #3D7A25; }
+.b-red { background: var(--red-light); color: var(--red); }
+.b-blue { background: var(--blue-light); color: #1A6E9A; }
+.b-gray { background: #F0EDE4; color: #666; }
+
+/* ===== AVATAR ===== */
+.avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  flex-shrink: 0;
+}
+.av-gold { background: var(--gold-light); color: #7A5C00; }
+.av-green { background: var(--green-light); color: #3D7A25; }
+.av-blue { background: var(--blue-light); color: #1A6E9A; }
+
+/* ===== FORMS ===== */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; }
+.form-input, .form-select, .form-textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--white);
+  transition: border-color 0.15s;
+  outline: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(255,198,0,0.15);
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white);
+  border-radius: var(--radius);
+  width: 100%; max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+}
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--black);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.modal-title { font-size: 14px; font-weight: 600; color: var(--gold); letter-spacing: 0.5px; }
+.modal-close {
+  color: #666; cursor: pointer; font-size: 18px; line-height: 1;
+  background: none; border: none; font-family: inherit;
+}
+.modal-close:hover { color: var(--gold); }
+.modal-body { padding: 20px; }
+
+/* ===== ALERTS ===== */
+.alert-card {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  border: 1px solid;
+}
+.alert-gold { background: var(--gold-light); border-color: #FFD966; }
+.alert-red { background: var(--red-light); border-color: #F5B8B4; }
+.alert-blue { background: var(--blue-light); border-color: #A8D8EE; }
+.alert-green { background: var(--green-light); border-color: #B5D89A; }
+.alert-icon { font-size: 16px; flex-shrink: 0; }
+.alert-title { font-size: 12px; font-weight: 600; color: var(--text); }
+.alert-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.alert-actions { display: flex; gap: 6px; margin-top: 6px; }
+
+/* ===== TIMELINE ===== */
+.timeline { padding: 0; }
+.tl-item { display: flex; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.tl-item:last-child { border-bottom: none; }
+.tl-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--gold); border: 2px solid var(--gold-dark);
+  margin-top: 3px; flex-shrink: 0;
+}
+.tl-dot.green { background: var(--green); border-color: #4A8030; }
+.tl-dot.blue { background: var(--blue); border-color: #2A7FAA; }
+.tl-date { font-size: 10px; color: var(--text-hint); margin-bottom: 2px; }
+.tl-text { font-size: 12px; color: var(--text); }
+.tl-sub { font-size: 11px; color: var(--text-muted); }
+
+/* ===== PROGRESS BAR ===== */
+.progress-wrap { margin-bottom: 12px; }
+.progress-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.progress-label { font-size: 12px; color: var(--text); }
+.progress-val { font-size: 11px; font-weight: 600; }
+.progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+
+/* ===== CALENDAR ===== */
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cal-month { font-size: 14px; font-weight: 600; color: var(--text); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-head { text-align: center; font-size: 10px; color: var(--text-muted); padding: 6px; font-weight: 600; text-transform: uppercase; }
+.cal-day {
+  text-align: center; font-size: 11px;
+  padding: 6px 2px; border-radius: var(--radius-sm);
+  color: var(--text-muted); cursor: pointer;
+  position: relative;
+}
+.cal-day:hover { background: var(--gold-light); color: var(--text); }
+.cal-day.has-event { color: #3D7A25; font-weight: 700; }
+.cal-day.has-event::after {
+  content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%; background: var(--gold);
+}
+.cal-day.today {
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 700;
+}
+.cal-day.other-month { color: #DDD; }
+
+/* ===== STAGE PILLS ===== */
+.stage-row { display: flex; gap: 6px; margin-bottom: 16px; }
+.stage-pill {
+  flex: 1; text-align: center;
+  padding: 8px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px; font-weight: 600;
+  border: 1px solid;
+  cursor: pointer; transition: all 0.15s;
+}
+.sp-new { background: var(--blue-light); color: #1A6E9A; border-color: #A8D8EE; }
+.sp-contact { background: var(--gold-light); color: #7A5C00; border-color: #FFD966; }
+.sp-meeting { background: #FFF0E0; color: #8A4A00; border-color: #FFD4A0; }
+.sp-client { background: var(--green-light); color: #3D7A25; border-color: #B5D89A; }
+
+/* ===== INVENTORY ===== */
+.inv-filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.cat-pill {
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 500;
+  background: var(--bg); border: 1px solid var(--border);
+  cursor: pointer; transition: all 0.15s; color: var(--text-muted);
+}
+.cat-pill.active { background: var(--gold); color: var(--black); border-color: var(--gold); }
+.cat-pill:hover:not(.active) { border-color: var(--gold-mid); color: var(--text); }
+
+.price-sel {
+  padding: 5px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 11px; font-family: inherit;
+  color: var(--text); background: var(--white);
+  font-weight: 500;
+  cursor: pointer;
+}
+.price-sel:focus { outline: none; border-color: var(--gold); }
+
+/* ===== TWO COL ===== */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* ===== DETAIL CARD ===== */
+.detail-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.detail-card-title {
+  font-size: 13px; font-weight: 600;
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 2px solid var(--gold);
+  color: var(--text);
+}
+.detail-row { margin-bottom: 10px; }
+.detail-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 2px; font-weight: 600; }
+.detail-val { font-size: 12px; color: var(--text); }
+.maps-link { color: var(--blue); text-decoration: underline; cursor: pointer; font-size: 12px; }
+.maps-link:hover { color: var(--gold-dark); }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--black); color: var(--gold);
+  padding: 10px 16px; border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 500;
+  border-left: 3px solid var(--gold);
+  z-index: 999; opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; }
+
+/* ===== SEARCH ===== */
+.search-bar {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 14px;
+}
+.search-input {
+  flex: 1; padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 12px; font-family: inherit;
+  outline: none; background: var(--white); color: var(--text);
+}
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: var(--text-hint); }
+
+/* ===== GOOGLE SHEETS STATUS ===== */
+.gs-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text-muted);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg);
+}
+.gs-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+.gs-dot.connected { background: var(--green); animation: pulse 2s infinite; }
+.gs-dot.error { background: var(--red); }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+  .sidebar.open { transform: none; }
+  .content { margin-left: 0; }
+  .form-grid, .two-col, .three-col { grid-template-columns: 1fr; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ===== CONFIG ===== */
+.config-section { margin-bottom: 24px; }
+.config-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.config-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.config-label { flex: 1; font-size: 12px; color: var(--text); }
+.config-val { font-size: 12px; color: var(--text-muted); }
+
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-eagle">
+      <svg viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Eagle wings -->
+        <path d="M18 6 C14 4 8 5 4 9 C6 9 8 10 9 12 C11 9 14 8 16 9 L18 6Z" fill="#FFC600"/>
+        <path d="M18 6 C22 4 28 5 32 9 C30 9 28 10 27 12 C25 9 22 8 20 9 L18 6Z" fill="#FFC600"/>
+        <!-- Eagle body -->
+        <path d="M13 10 C13 10 10 14 10 18 C10 22 13 25 16 26 L18 28 L20 26 C23 25 26 22 26 18 C26 14 23 10 23 10 C21 12 19 13 18 13 C17 13 15 12 13 10Z" fill="#FFC600"/>
+        <!-- Eagle head -->
+        <ellipse cx="18" cy="9" rx="4" ry="4" fill="#FFC600"/>
+        <!-- Eagle beak -->
+        <path d="M21 9 L24 10 L21 11Z" fill="#CC9F00"/>
+        <!-- Eagle eye -->
+        <circle cx="20" cy="8.5" r="1" fill="#111"/>
+        <!-- Eagle tail feathers -->
+        <path d="M16 26 C14 28 12 32 12 34 L15 32 L18 35 L21 32 L24 34 C24 32 22 28 20 26Z" fill="#FFC600"/>
+        <!-- Wing tips -->
+        <path d="M4 9 L1 13 L5 12 L3 16 L7 13 L9 12Z" fill="#CC9F00"/>
+        <path d="M32 9 L35 13 L31 12 L33 16 L29 13 L27 12Z" fill="#CC9F00"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div class="logo-forever">FOREVER®</div>
+      <div class="logo-sub">Living Products</div>
+    </div>
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-title">CRM — Mi Negocio Independiente</div>
+  <div class="gs-status" id="gsStatus">
+    <div class="gs-dot" id="gsDot"></div>
+    <span id="gsText">Sin conectar</span>
+  </div>
+  <div class="topbar-badge">FBO</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-section-label">Gestión</div>
+  <div class="nav-item active" onclick="showSection('dashboard',this)">
+    <span class="nav-icon">⬛</span> Dashboard
+    <span class="nav-badge red" id="badge-alertas">5</span>
+  </div>
+  <div class="nav-item" onclick="showSection('clientes',this)">
+    <span class="nav-icon">👤</span> Clientes
+  </div>
+  <div class="nav-item" onclick="showSection('prospectos',this)">
+    <span class="nav-icon">🎯</span> Prospectos
+  </div>
+  <div class="nav-item" onclick="showSection('seguimiento',this)">
+    <span class="nav-icon">📋</span> Seguimiento
+  </div>
+  <div class="sidebar-section-label">Agenda</div>
+  <div class="nav-item" onclick="showSection('calendario',this)">
+    <span class="nav-icon">📅</span> Calendario
+  </div>
+  <div class="sidebar-section-label">Productos</div>
+  <div class="nav-item" onclick="showSection('inventario',this)">
+    <span class="nav-icon">📦</span> Inventario
+  </div>
+  <div class="sidebar-section-label">Sistema</div>
+  <div class="nav-item" onclick="showSection('configuracion',this)">
+    <span class="nav-icon">⚙️</span> Configuración
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-text">Forever Living Products® MX<br>foreverliving.com.mx</div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<main class="content">
+
+<!-- ==================== DASHBOARD ==================== -->
+<div id="dashboard" class="section active">
+  <div class="page-header">
+    <div class="page-title"><div class="page-title-bar"></div>Dashboard</div>
+    <div style="font-size:11px;color:var(--text-muted)" id="fecha-hoy"></div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">Clientes activos</div>
+      <div class="metric-val green" id="m-clientes">0</div>
+      <div class="metric-sub">En base de datos</div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-label">Prospectos</div>
+      <div class="metric-val" id="m-prospectos" style="color:var(--blue)">0</div>
+      <div class="metric-sub">Seguimiento activo</div>
+    </div>
+    <div class="metric-card red">
+      <div class="metric-label">Avisos recompra</div>
+      <div class="metric-val red" id="m-alertas">0</div>
+      <div class="metric-sub">Acción requerida</div>
+    </div>
+    <div class="metric-card blue">
+      <div class="metric-label">Citas esta semana</div>
+      <div class="metric-val blue" id="m-citas">0</div>
+      <div class="metric-sub">Programadas</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text)">⚠️ Avisos de recompra urgentes</div>
+      <div id="lista-alertas">
+        <div class="alert-card alert-gold">
+          <div class="alert-icon">⏰</div>
+          <div>
+            <div class="alert-title">Sin clientes registrados aún</div>
+            <div class="alert-sub">Agrega clientes en la sección Clientes para ver avisos aquí</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text)">📅 Citas próximas</div>
+      <div id="lista-citas-dash">
+        <div class="alert-card alert-blue">
+          <div class="alert-icon">📌</div>
+          <div>
+            <div class="alert-title">Sin citas programadas</div>
+            <div class="alert-sub">Agenda citas desde el Calendario o Prospectos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CLIENTES ==================== -->
+<div id="clientes" class="section">
+  <div class="page-header">
+    <div class="page-title"><div class="page-title-bar"></div>Clientes</div>
+    <button class="btn btn-gold" onclick="abrirModalCliente()">+ Nuevo cliente</button>
+  </div>
+
+  <div class="search-bar">
+    <input class="search-input" type="text" id="buscar-cliente" placeholder="Buscar por nombre, teléfono o producto..." oninput="renderClientes()">
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-header-title">Lista de clientes</span>
+      <span id="total-clientes" style="font-size:11px;color:var(--text-muted)">0 clientes</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono móvil</th>
+            <th>Último producto</th>
+            <th>Última compra</th>
+            <th>Próx. recompra</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-clientes">
+          <tr><td colspan="7" style="text-align:center;color:var(--text-hint);padding:24px">Sin clientes registrados. Agrega el primero con el botón amarillo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Detalle cliente -->
+  <div id="detalle-cliente" style="display:none;margin-top:16px">
+    <div class="detail-card">
+      <div class="detail-card-title" id="dc-nombre">—</div>
+      <div class="three-col">
+        <div>
+          <div class="detail-row"><div class="detail-label">Teléfono móvil</div><div class="detail-val" id="dc-tel-movil">—</div></div>
+          <div class="detail-row"><div class="detail-label">Teléfono casa</div><div class="detail-val" id="dc-tel-casa">—</div></div>
+          <div class="detail-row"><div class="detail-label">Teléfono trabajo</div><div class="detail-val" id="dc-tel-trabajo">—</div></div>
+        </div>
+        <div>
+          <div class="detail-row"><div class="detail-label">Correo electrónico</div><div class="detail-val" id="dc-email">—</div></div>
+          <div class="detail-row"><div class="detail-label">Dirección</div><div class="detail-val"><a class="maps-link" id="dc-maps" href="#" target="_blank">📍 Ver en Google Maps</a></div></div>
+          <div class="detail-row"><div class="detail-label">Dirección (texto)</div><div class="detail-val" id="dc-dir">—</div></div>
+        </div>
+        <div>
+          <div class="detail-row"><div class="detail-label">Último producto</div><div class="detail-val" id="dc-producto">—</div></div>
+          <div class="detail-row"><div class="detail-label">Lista de precio</div><div class="detail-val" id="dc-lista">—</div></div>
+          <div class="detail-row"><div class="detail-label">Días hasta recompra</div><div class="detail-val" id="dc-dias">—</div></div>
+          <div class="detail-row"><div class="detail-label">Próx. entrega acordada</div><div class="detail-val" id="dc-entrega">—</div></div>
+          <div class="detail-row"><div class="detail-label">Notas</div><div class="detail-val" id="dc-notas">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PROSPECTOS ==================== -->
+<div id="prospectos" class="section">
+  <div class="page-header">
+    <div class="page-title"><div class="page-title-bar"></div>Prospectos</div>
+    <button class="btn btn-gold" onclick="abrirModalProspecto()">+ Nuevo prospecto</button>
+  </div>
+
+  <div class="stage-row">
+    <div class="stage-pill sp-new" onclick="filtrarEtapa('Nuevo')">🔵 Nuevo (<span id="cnt-nuevo">0</span>)</div>
+    <div class="stage-pill sp-contact" onclick="filtrarEtapa('Contactado')">📞 Contactado (<span id="cnt-contactado">0</span>)</div>
+    <div class="stage-pill sp-meeting" onclick="filtrarEtapa('Cita')">🤝 Cita (<span id="cnt-cita">0</span>)</div>
+    <div class="stage-pill sp-client" onclick="filtrarEtapa('Cliente')">⭐ Convertido (<span id="cnt-cliente">0</span>)</div>
+    <div class="stage-pill" style="background:var(--bg);border-color:var(--border);color:var(--text-muted)" onclick="filtrarEtapa('')">Todos</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-header-title">Lista de prospectos</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Interés / Tema</th>
+            <th>Tipo de cita</th>
+            <th>Fecha cita</th>
+            <th>Etapa</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-prospectos">
+          <tr><td colspan="7" style="text-align:center;color:var(--text-hint);padding:24px">Sin prospectos registrados.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SEGUIMIENTO ==================== -->
+<div id="seguimiento" class="section">
+  <div class="page-header">
+    <div class="page-title"><div class="page-title-bar"></div>Seguimiento</div>
+    <button class="btn btn-gold" onclick="abrirModalSeguimiento()">+ Registrar compra</button>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><span class="card-header-title">Seleccionar cliente</span></div>
+        <div class="card-body">
+          <select class="form-select" style="width:100%" id="sel-cliente-seg" onchange="verSeguimiento()">
+            <option value="">— Elige un cliente —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-header-title">Historial de compras</span></div>
+        <div class="timeline" id="timeline-cliente">
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div><div class="tl-text" style="color:var(--text-muted)">Selecciona un cliente para ver su historial</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="detail-card" style="margin-bottom:16px">
+        <div class="detail-card-title">Estimación de agotamiento</div>
+        <div id="progress-productos">
+          <div style="color:var(--text-muted);font-size:12px">Selecciona un cliente para ver el progreso de sus productos</div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card-title">Agregar compra manualmente</div>
+        <div class="form-group" style="margin-bottom:10px">
+          <div class="form-label">Producto comprado</div>
+          <input class="form-input" id="seg-producto" placeholder="Nombre del producto" list="lista-productos-seg">
+          <datalist id="lista-productos-seg"></datalist>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <div class="form-label">Fecha de compra</div>
+            <input class="form-input" type="date" id="seg-fecha">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Precio vendido</div>
+            <input class="form-input" type="number" id="seg-precio" placeholder="$0.00">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Lista de precio usada</div>
+            <select class="form-select" id="seg-lista">
+              <option>Público en general</option>
+              <option>Cliente preferente</option>
+              <option>Asistente de supervisor</option>
+              <option>Supervisor</option>
+              <option>Asistente de gerente</option>
+              <option>Gerente</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Días estimados duración</div>
+            <input class="form-input" type="number" id="seg-dias" placeholder="30" value="30">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:10px">
+          <div class="form-label">Notas</div>
+          <textarea class="form-textarea" id="seg-notas" placeholder="Observaciones sobre la compra..." rows="2"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-gold" onclick="guardarCompra()">Guardar compra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CALENDARIO ==================== -->
+<div id="calendario" class="section">
+  <div class="page-header">
+    <div class="page-title"><div class="page-title-bar"></div>Calendario</div>
+    <button class="btn btn-gold" onclick="abrirModalCita()">+ Agendar cita/entrega</button>
+  </div>
+
+  <div class="two-col">
+    <div class="detail-card">
+      <div class="cal-header">
+        <button class="btn btn-outline btn-sm" onclick="cambiarMes(-1)">← Anterior</button>
+        <div class="cal-month" id="cal-mes-label">Cargando...</div>
+        <button class="btn btn-outline btn-sm" onclick="cambiarMes(1)">Siguiente →</button>
+      </div>
+      <div class="cal-grid" id="cal-grid">
+        <div class="cal-head">D</div><div class="cal-head">L</div>
+        <div class="cal-head">M</div><div class="cal-head">X</div>
+        <div class="cal-head">J</div><div class="cal-head">V</div>
+        <div class="cal-head">S</div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;font-size:10px;color:var(--text-muted)">
+        <span>🟡 Hoy</span>
+        <span>🟢 Con evento</span>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text)" id="cal-dia-label">Eventos del mes</div>
+      <div id="lista-eventos">
+        <div style="color:var(--text-muted);font-size:12px">Haz clic en un día del calendario para ver sus eventos.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== INVENTARIO ==================== -->
+<div id="inventario" class="section">
+  <div class="page-header">
+    <div class="page-title"><div class="page-title-bar"></div>Inventario</div>
+    <button class="btn btn-gold" onclick="abrirModalProducto()">+ Agregar producto</button>
+  </div>
+
+  <div class="inv-filters">
+    <div class="cat-pill active" onclick="filtrarCat('',this)">Todos</div>
+    <div class="cat-pill" onclick="filtrarCat('Bebidas',this)">Bebidas</div>
+    <div class="cat-pill" onclick="filtrarCat('Nutrición',this)">Nutrición</div>
+    <div class="cat-pill" onclick="filtrarCat('Colmena',this)">Colmena</div>
+    <div class="cat-pill" onclick="filtrarCat('Cuidado personal',this)">Cuidado personal</div>
+    <div class="cat-pill" onclick="filtrarCat('Cuidado de la piel',this)">Cuidado de la piel</div>
+    <div class="cat-pill" onclick="filtrarCat('Combos',this)">Combos</div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--text-muted)">Ver precios:</span>
+      <select class="price-sel" id="lista-precio-activa" onchange="renderInventario()">
+        <option value="publico">Público en general</option>
+        <option value="preferente">Cliente preferente</option>
+        <option value="asistente_supervisor">Asistente de supervisor</option>
+        <option value="supervisor">Supervisor</option>
+        <option value="asistente_gerente">Asistente de gerente</option>
+        <option value="gerente">Gerente</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header">
+      <span class="card-header-title">Catálogo de productos Forever Living</span>
+      <span id="total-inv" style="font-size:11px;color:var(--text-muted)"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cód.</th>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Precio seleccionado</th>
+            <th>CC</th>
+            <th>Stock</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-inventario"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-header-title">Movimientos de inventario</span>
+      <button class="btn btn-outline btn-sm" onclick="abrirModalMovimiento()">+ Registrar movimiento</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Origen / Destino</th><th>Lista precio</th><th>Notas</th></tr>
+        </thead>
+        <tbody id="tabla-movimientos">
+          <tr><td colspan="7" style="text-align:center;color:var(--text-hint);padding:16px">Sin movimientos registrados.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CONFIGURACIÓN ==================== -->
+<div id="configuracion" class="section">
+  <div class="page-header">
+    <div class="page-title"><div class="page-title-bar"></div>Configuración</div>
+  </div>
+
+  <div class="two-col">
+    <div class="detail-card">
+      <div class="detail-card-title">🔗 Conexión Google Sheets</div>
+      <div class="config-section">
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.6">
+          Para sincronizar datos entre dispositivos, conecta el CRM a tu Google Sheets.
+          Sigue los pasos:
+        </p>
+        <div style="font-size:12px;line-height:2;color:var(--text);background:var(--gold-light);padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:14px;border-left:3px solid var(--gold)">
+          <strong>Paso 1:</strong> Ve a <a href="https://sheets.google.com" target="_blank" style="color:var(--blue)">sheets.google.com</a> y crea una hoja nueva.<br>
+          <strong>Paso 2:</strong> Crea 5 pestañas: <code>Clientes</code>, <code>Prospectos</code>, <code>Compras</code>, <code>Citas</code>, <code>Inventario</code><br>
+          <strong>Paso 3:</strong> Ve a <em>Extensiones → Apps Script</em>, pega el script de API (te lo genero abajo).<br>
+          <strong>Paso 4:</strong> Despliega como Web App y copia la URL aquí.
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <div class="form-label">URL de tu Google Apps Script Web App</div>
+          <input class="form-input" id="gs-url" placeholder="https://script.google.com/macros/s/..." oninput="guardarConfig()">
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <div class="form-label">ID de tu Google Sheet</div>
+          <input class="form-input" id="gs-id" placeholder="1BxiM..." oninput="guardarConfig()">
+        </div>
+        <button class="btn btn-gold" onclick="probarConexion()">Probar conexión</button>
+        <button class="btn btn-outline" style="margin-left:8px" onclick="generarScript()">Ver script Apps Script</button>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-card-title">👤 Mi perfil</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <div class="form-label">Mi nombre</div>
+        <input class="form-input" id="cfg-nombre" placeholder="Tu nombre completo" oninput="guardarConfig()">
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <div class="form-label">Mi nivel Forever</div>
+        <select class="form-select" id="cfg-nivel" onchange="guardarConfig()">
+          <option>Empresario Nuevo</option>
+          <option>Asistente de Supervisor</option>
+          <option>Supervisor</option>
+          <option>Asistente de Gerente</option>
+          <option>Gerente</option>
+          <option>Sub Gerente</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <div class="form-label">Mi lista de precio habitual</div>
+        <select class="form-select" id="cfg-lista-default" onchange="guardarConfig()">
+          <option value="gerente">Gerente (48% desc.)</option>
+          <option value="asistente_gerente">Asistente de Gerente (43% desc.)</option>
+          <option value="supervisor">Supervisor (38% desc.)</option>
+          <option value="asistente_supervisor">Asistente de Supervisor (30% desc.)</option>
+          <option value="preferente">Cliente Preferente (5% desc.)</option>
+          <option value="publico">Público en general</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Ciudad / Estado</div>
+        <input class="form-input" id="cfg-ciudad" placeholder="Mazatlán, Sinaloa" oninput="guardarConfig()">
+      </div>
+
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        <div class="config-title">Alertas automáticas</div>
+        <div class="config-row">
+          <div class="config-label">Días de anticipación para avisar recompra</div>
+          <input class="form-input" type="number" id="cfg-dias-alerta" value="5" style="width:60px;text-align:center" oninput="guardarConfig()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-card" style="margin-top:16px">
+    <div class="detail-card-title">💾 Gestión de datos locales</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Los datos se guardan localmente en este navegador. Exporta un respaldo frecuentemente.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="exportarDatos()">⬇️ Exportar datos (JSON)</button>
+      <button class="btn btn-outline" onclick="importarDatos()">⬆️ Importar datos (JSON)</button>
+      <button class="btn btn-danger" onclick="borrarTodo()">🗑️ Borrar todos los datos</button>
+    </div>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="cargarJSON(this)">
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ==================== MODALES ==================== -->
+
+<!-- Modal: Nuevo Cliente -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">👤 Nuevo cliente</span>
+      <button class="modal-close" onclick="cerrarModal('modal-cliente')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <div class="form-label">Nombre completo *</div>
+          <input class="form-input" id="c-nombre" placeholder="Nombre y apellidos">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Teléfono móvil *</div>
+          <input class="form-input" id="c-tel-movil" placeholder="614-123-4567" type="tel">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Teléfono casa</div>
+          <input class="form-input" id="c-tel-casa" placeholder="614-xxx-xxxx" type="tel">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Teléfono trabajo</div>
+          <input class="form-input" id="c-tel-trabajo" placeholder="614-xxx-xxxx" type="tel">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Correo electrónico</div>
+          <input class="form-input" id="c-email" placeholder="correo@ejemplo.com" type="email">
+        </div>
+        <div class="form-group full">
+          <div class="form-label">Dirección (para Google Maps)</div>
+          <input class="form-input" id="c-direccion" placeholder="Calle, Número, Col., Ciudad">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Último producto comprado</div>
+          <input class="form-input" id="c-producto" placeholder="Aloe Vera Gel" list="lista-prods-c">
+          <datalist id="lista-prods-c"></datalist>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Lista de precio habitual</div>
+          <select class="form-select" id="c-lista">
+            <option>Público en general</option>
+            <option>Cliente preferente</option>
+            <option>Asistente de supervisor</option>
+            <option>Supervisor</option>
+            <option>Asistente de gerente</option>
+            <option>Gerente</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Fecha última compra</div>
+          <input class="form-input" id="c-fecha-compra" type="date">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Días estimados de duración</div>
+          <input class="form-input" id="c-dias-duracion" type="number" placeholder="30" value="30">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Fecha de entrega acordada</div>
+          <input class="form-input" id="c-fecha-entrega" type="date">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Hora de entrega</div>
+          <input class="form-input" id="c-hora-entrega" type="time">
+        </div>
+        <div class="form-group full">
+          <div class="form-label">Notas</div>
+          <textarea class="form-textarea" id="c-notas" placeholder="Observaciones, preferencias, referencias..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-cliente')">Cancelar</button>
+        <button class="btn btn-gold" onclick="guardarCliente()">Guardar cliente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nuevo Prospecto -->
+<div class="modal-overlay" id="modal-prospecto">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🎯 Nuevo prospecto</span>
+      <button class="modal-close" onclick="cerrarModal('modal-prospecto')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <div class="form-label">Nombre completo *</div>
+          <input class="form-input" id="p-nombre" placeholder="Nombre y apellidos">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Teléfono *</div>
+          <input class="form-input" id="p-telefono" placeholder="614-xxx-xxxx" type="tel">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Correo electrónico</div>
+          <input class="form-input" id="p-email" placeholder="correo@ejemplo.com" type="email">
+        </div>
+        <div class="form-group full">
+          <div class="form-label">Interés / Tema principal</div>
+          <input class="form-input" id="p-interes" placeholder="Producto de interés o plan de negocio">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Tipo de cita / reunión</div>
+          <select class="form-select" id="p-tipo-cita">
+            <option value="">— Sin cita aún —</option>
+            <option>Mostrar producto</option>
+            <option>Plan de negocio Forever</option>
+            <option>Seguimiento</option>
+            <option>Entrega de muestra</option>
+            <option>Llamada telefónica</option>
+            <option>Reunión presencial</option>
+            <option>Videollamada</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Fecha de cita</div>
+          <input class="form-input" id="p-fecha-cita" type="date">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Hora de cita</div>
+          <input class="form-input" id="p-hora-cita" type="time">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Etapa actual</div>
+          <select class="form-select" id="p-etapa">
+            <option>Nuevo</option>
+            <option>Contactado</option>
+            <option>Cita</option>
+            <option>Cliente</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <div class="form-label">Notas y estrategia</div>
+          <textarea class="form-textarea" id="p-notas" placeholder="Cómo lo conociste, qué le interesa, cómo abordarlo..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-prospecto')">Cancelar</button>
+        <button class="btn btn-gold" onclick="guardarProspecto()">Guardar prospecto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Cita/Entrega en Calendario -->
+<div class="modal-overlay" id="modal-cita">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📅 Agendar evento</span>
+      <button class="modal-close" onclick="cerrarModal('modal-cita')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <div class="form-label">Título del evento *</div>
+          <input class="form-input" id="ev-titulo" placeholder="Ej: Entrega a María García">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Tipo de evento</div>
+          <select class="form-select" id="ev-tipo">
+            <option>Entrega a cliente</option>
+            <option>Cita con prospecto</option>
+            <option>Recompra programada</option>
+            <option>Llamada de seguimiento</option>
+            <option>Plan de negocio</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Persona relacionada</div>
+          <input class="form-input" id="ev-persona" placeholder="Nombre del cliente o prospecto">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Fecha *</div>
+          <input class="form-input" id="ev-fecha" type="date">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Hora</div>
+          <input class="form-input" id="ev-hora" type="time">
+        </div>
+        <div class="form-group full">
+          <div class="form-label">Notas / Dirección</div>
+          <textarea class="form-textarea" id="ev-notas" placeholder="Dirección de entrega, qué llevar, tema a tratar..." rows="2"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-cita')">Cancelar</button>
+        <button class="btn btn-gold" onclick="guardarCita()">Guardar evento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Movimiento de Inventario -->
+<div class="modal-overlay" id="modal-movimiento">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📦 Registrar movimiento</span>
+      <button class="modal-close" onclick="cerrarModal('modal-movimiento')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <div class="form-label">Producto *</div>
+          <input class="form-input" id="mv-producto" placeholder="Nombre del producto" list="lista-prods-mv">
+          <datalist id="lista-prods-mv"></datalist>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Tipo de movimiento *</div>
+          <select class="form-select" id="mv-tipo">
+            <option value="entrada">Entrada (compra a FLP)</option>
+            <option value="salida">Salida (venta a cliente)</option>
+            <option value="ajuste">Ajuste de inventario</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Cantidad *</div>
+          <input class="form-input" id="mv-cantidad" type="number" placeholder="1" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Fecha</div>
+          <input class="form-input" id="mv-fecha" type="date">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Origen / Destino</div>
+          <input class="form-input" id="mv-origen" placeholder="FLP #pedido / Nombre cliente">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Lista de precio usada</div>
+          <select class="form-select" id="mv-lista">
+            <option>Público en general</option>
+            <option>Cliente preferente</option>
+            <option>Asistente de supervisor</option>
+            <option>Supervisor</option>
+            <option>Asistente de gerente</option>
+            <option>Gerente</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <div class="form-label">Notas</div>
+          <textarea class="form-textarea" id="mv-notas" placeholder="Observaciones..." rows="2"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-movimiento')">Cancelar</button>
+        <button class="btn btn-gold" onclick="guardarMovimiento()">Registrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Script Google Apps Script -->
+<div class="modal-overlay" id="modal-script">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <span class="modal-title">📜 Script para Google Apps Script</span>
+      <button class="modal-close" onclick="cerrarModal('modal-script')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Copia este script en tu Google Apps Script (Extensiones → Apps Script) y despliégalo como Web App con acceso "Cualquiera".</p>
+      <pre id="script-content" style="background:#0D0D0D;color:#FFC600;padding:14px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre-wrap;max-height:400px;overflow-y:auto"></pre>
+      <div class="form-actions" style="margin-top:12px">
+        <button class="btn btn-gold" onclick="copiarScript()">Copiar script</button>
+        <button class="btn btn-outline" onclick="cerrarModal('modal-script')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ================================================================
+// DATOS BASE — Catálogo de productos Forever Living
+// Extraído de las 6 listas de precios oficiales Mayo 2025
+// ================================================================
+
+const PRODUCTOS_FL = [
+  // === BEBIDAS ===
+  { cod:"015", nombre:"Aloe Vera Gel 1L", cat:"Bebidas", cc:0.090, publico:501, preferente:476.06, asistente_supervisor:352.87, supervisor:312.74, asistente_gerente:287.68, gerente:262.62 },
+  { cod:"7163", nombre:"Aloe Vera Gel 330ml 3-pak", cat:"Bebidas", cc:0.090, publico:501, preferente:476.06, asistente_supervisor:352.87, supervisor:312.74, asistente_gerente:287.68, gerente:262.62 },
+  { cod:"836", nombre:"Aloe Mango 1L", cat:"Bebidas", cc:0.090, publico:501, preferente:475.83, asistente_supervisor:352.87, supervisor:312.74, asistente_gerente:287.68, gerente:262.62 },
+  { cod:"034", nombre:"Aloe Berry Nectar 1L", cat:"Bebidas", cc:0.090, publico:501, preferente:476.06, asistente_supervisor:352.87, supervisor:312.74, asistente_gerente:287.68, gerente:262.62 },
+  { cod:"7353", nombre:"Aloe Berry Nectar 330ml 3-pak", cat:"Bebidas", cc:0.090, publico:501, preferente:476.06, asistente_supervisor:352.87, supervisor:312.74, asistente_gerente:287.68, gerente:262.62 },
+  { cod:"077", nombre:"Bits N Peaches 1L", cat:"Bebidas", cc:0.090, publico:501, preferente:476.06, asistente_supervisor:352.87, supervisor:312.74, asistente_gerente:287.68, gerente:262.62 },
+  { cod:"7783", nombre:"Aloe Peaches 330ml 3-pak", cat:"Bebidas", cc:0.090, publico:501, preferente:476.06, asistente_supervisor:352.87, supervisor:312.74, asistente_gerente:287.68, gerente:262.62 },
+  { cod:"196", nombre:"Forever Freedom 1L", cat:"Bebidas", cc:0.136, publico:757, preferente:719.20, asistente_supervisor:532.44, supervisor:471.89, asistente_gerente:434.07, gerente:396.26 },
+  { cod:"200", nombre:"Aloe Blossom Herbal Tea (25 bolsas)", cat:"Bebidas", cc:0.071, publico:405, preferente:384.19, asistente_supervisor:285.59, supervisor:253.11, asistente_gerente:232.93, gerente:212.74 },
+
+  // === NUTRICIÓN ===
+  { cod:"048", nombre:"Absorbent-C Tablets 100 Tab.", cat:"Nutrición", cc:0.071, publico:396, preferente:375.14, asistente_supervisor:279.10, supervisor:247.54, asistente_gerente:227.82, gerente:207.87 },
+  { cod:"065", nombre:"Forever Garlic-Thyme 100 Cáps.", cat:"Nutrición", cc:0.076, publico:424, preferente:402.06, asistente_supervisor:298.35, supervisor:264.48, asistente_gerente:243.37, gerente:222.26 },
+  { cod:"068", nombre:"Fields of Greens 80 Tab.", cat:"Nutrición", cc:0.053, publico:296, preferente:280.26, asistente_supervisor:208.57, supervisor:184.90, asistente_gerente:170.29, gerente:155.44 },
+  { cod:"206", nombre:"Forever Calcium 90 Tab.", cat:"Nutrición", cc:0.087, publico:485, preferente:460.06, asistente_supervisor:341.27, supervisor:302.53, asistente_gerente:278.40, gerente:254.04 },
+  { cod:"264", nombre:"Forever Active HA 60 Cáps.", cat:"Nutrición", cc:0.136, publico:757, preferente:719.20, asistente_supervisor:532.44, supervisor:471.89, asistente_gerente:434.07, gerente:396.26 },
+  { cod:"289", nombre:"Forever Lean 120 Cáps.", cat:"Nutrición", cc:0.167, publico:930, preferente:882.76, asistente_supervisor:652.85, supervisor:578.61, asistente_gerente:531.98, gerente:485.58 },
+  { cod:"354", nombre:"Forever Kids 120 Tab.", cat:"Nutrición", cc:0.060, publico:335, preferente:317.38, asistente_supervisor:236.18, supervisor:209.50, asistente_gerente:192.79, gerente:176.09 },
+  { cod:"355", nombre:"Forever ImBlend 60 Tab.", cat:"Nutrición", cc:0.118, publico:658, preferente:624.31, asistente_supervisor:461.91, supervisor:409.25, asistente_gerente:376.54, gerente:343.59 },
+  { cod:"374", nombre:"Vitolize Men 60 Cáps.", cat:"Nutrición", cc:0.120, publico:685, preferente:649.83, asistente_supervisor:480.70, supervisor:425.95, asistente_gerente:391.85, gerente:357.51 },
+  { cod:"376", nombre:"Forever Arctic Sea 120 Cáps.", cat:"Nutrición", cc:0.127, publico:724, preferente:687.18, asistente_supervisor:508.78, supervisor:450.78, asistente_gerente:414.82, gerente:378.62 },
+  { cod:"037", nombre:"Nature Min 180 Tab.", cat:"Nutrición", cc:0.076, publico:424, preferente:0, asistente_supervisor:0, supervisor:0, asistente_gerente:0, gerente:0 },
+  { cod:"439", nombre:"Forever Daily 60 Tab.", cat:"Nutrición", cc:0.080, publico:446, preferente:423.17, asistente_supervisor:313.90, supervisor:278.17, asistente_gerente:256.13, gerente:233.86 },
+  { cod:"463", nombre:"Forever Therm 60 Tab.", cat:"Nutrición", cc:0.114, publico:635, preferente:602.97, asistente_supervisor:446.37, supervisor:395.56, asistente_gerente:363.78, gerente:332.22 },
+  { cod:"464", nombre:"Forever Fiber 30 sobres 6.1g", cat:"Nutrición", cc:0.115, publico:656, preferente:622.69, asistente_supervisor:460.75, supervisor:408.32, asistente_gerente:375.61, gerente:342.90 },
+  { cod:"470", nombre:"Forever Lite Ultra Vanilla 375g", cat:"Nutrición", cc:0.122, publico:680, preferente:645.19, asistente_supervisor:477.46, supervisor:423.17, asistente_gerente:389.06, gerente:355.19 },
+  { cod:"471", nombre:"Forever Lite Ultra Chocolat 375g", cat:"Nutrición", cc:0.122, publico:680, preferente:645.19, asistente_supervisor:477.46, supervisor:423.17, asistente_gerente:389.06, gerente:355.19 },
+  { cod:"473", nombre:"Argi+ Stick Packs 30 sobres 12g", cat:"Nutrición", cc:0.293, publico:1632, preferente:1549.99, asistente_supervisor:1143.06, supervisor:1012.45, asistente_gerente:931.02, gerente:849.35 },
+  { cod:"551", nombre:"Forever Move 90 Cáps.", cat:"Nutrición", cc:0.290, publico:1615, preferente:1533.98, asistente_supervisor:1131.70, supervisor:1002.47, asistente_gerente:921.74, gerente:841.00 },
+  { cod:"610", nombre:"Forever Active Pro-B 30 Cáps.", cat:"Nutrición", cc:0.147, publico:819, preferente:777.66, asistente_supervisor:574.90, supervisor:609.47, asistente_gerente:468.41, gerente:427.58 },
+  { cod:"613", nombre:"Marine Collagen 30 sobres 15ml", cat:"Nutrición", cc:0.327, publico:1820, preferente:1728.63, asistente_supervisor:1275.77, supervisor:1130.30, asistente_gerente:1039.36, gerente:948.18 },
+  { cod:"621", nombre:"Forever Supergreens 30 sobres 4.4g", cat:"Nutrición", cc:0.154, publico:858, preferente:814.55, asistente_supervisor:602.04, supervisor:533.37, asistente_gerente:490.45, gerente:447.76 },
+  { cod:"624", nombre:"Forever Ivis 60 Cáps.", cat:"Nutrición", cc:0.140, publico:799, preferente:758.41, asistente_supervisor:560.74, supervisor:496.94, asistente_gerente:457.04, gerente:417.14 },
+
+  // === COLMENA ===
+  { cod:"026", nombre:"Forever Bee Pollen 100 Tab.", cat:"Colmena", cc:0.065, publico:362, preferente:343.82, asistente_supervisor:255.66, supervisor:226.66, asistente_gerente:208.57, gerente:190.47 },
+  { cod:"027", nombre:"Forever Bee Propolis 60 Tab.", cat:"Colmena", cc:0.132, publico:735, preferente:697.62, asistente_supervisor:516.90, supervisor:458.20, asistente_gerente:421.31, gerente:384.66 },
+  { cod:"036", nombre:"Forever Bee Royal Jelly 60 Tab.", cat:"Colmena", cc:0.138, publico:768, preferente:729.64, asistente_supervisor:539.86, supervisor:478.38, asistente_gerente:440.10, gerente:401.59 },
+
+  // === CUIDADO PERSONAL ===
+  { cod:"028", nombre:"Forever Bright Toothgel 130g", cat:"Cuidado personal", cc:0.034, publico:190, preferente:179.57, asistente_supervisor:134.79, supervisor:119.71, asistente_gerente:110.20, gerente:100.69 },
+  { cod:"040", nombre:"Aloe First 473ml", cat:"Cuidado personal", cc:0.084, publico:468, preferente:444.05, asistente_supervisor:329.44, supervisor:292.09, asistente_gerente:268.66, gerente:245.22 },
+  { cod:"067", nombre:"Ever Shield 32.1g", cat:"Cuidado personal", cc:0.030, publico:168, preferente:158.92, asistente_supervisor:119.25, supervisor:105.79, asistente_gerente:97.44, gerente:89.09 },
+  { cod:"318", nombre:"Forever Hand Sanitizer 59ml", cat:"Cuidado personal", cc:0.017, publico:95, preferente:89.78, asistente_supervisor:68.67, supervisor:61.02, asistente_gerente:56.38, gerente:51.74 },
+  { cod:"640", nombre:"Aloe Jojoba Shampoo 296ml", cat:"Cuidado personal", cc:0.087, publico:485, preferente:460.06, asistente_supervisor:341.27, supervisor:302.53, asistente_gerente:278.40, gerente:254.04 },
+  { cod:"641", nombre:"Aloe Jojoba Conditioner 296ml", cat:"Cuidado personal", cc:0.093, publico:518, preferente:491.84, asistente_supervisor:364.47, supervisor:323.18, asistente_gerente:297.19, gerente:271.44 },
+  { cod:"633", nombre:"Aloe Liquid Soap 437ml", cat:"Cuidado personal", cc:0.075, publico:418, preferente:396.49, asistente_supervisor:294.41, supervisor:261.00, asistente_gerente:240.12, gerente:219.24 },
+  { cod:"284", nombre:"Aloe Avocado Face & Body Soap 142g", cat:"Cuidado personal", cc:0.027, publico:151, preferente:142.68, asistente_supervisor:107.88, supervisor:95.82, asistente_gerente:88.39, gerente:80.97 },
+  { cod:"642", nombre:"Nourishing Hair Oil", cat:"Cuidado personal", cc:0.111, publico:618, preferente:586.26, asistente_supervisor:434.54, supervisor:385.12, asistente_gerente:354.26, gerente:323.41 },
+  { cod:"643", nombre:"Forever Alofa", cat:"Cuidado personal", cc:0.134, publico:746, preferente:708.06, asistente_supervisor:524.09, supervisor:464.46, asistente_gerente:427.11, gerente:389.99 },
+  { cod:"644", nombre:"Forever Malosi", cat:"Cuidado personal", cc:0.134, publico:746, preferente:708.06, asistente_supervisor:524.09, supervisor:464.46, asistente_gerente:427.11, gerente:389.99 },
+
+  // === CUIDADO DE LA PIEL ===
+  { cod:"022", nombre:"Aloe Lips 4.25g", cat:"Cuidado de la piel", cc:0.016, publico:90, preferente:84.68, asistente_supervisor:64.73, supervisor:57.54, asistente_gerente:53.13, gerente:48.72 },
+  { cod:"051", nombre:"Aloe Propolis Creme 113g", cat:"Cuidado de la piel", cc:0.083, publico:462, preferente:438.94, asistente_supervisor:325.50, supervisor:288.61, asistente_gerente:265.41, gerente:242.44 },
+  { cod:"061", nombre:"Aloe Vera Gelly 118ml", cat:"Cuidado de la piel", cc:0.059, publico:329, preferente:311.81, asistente_supervisor:232.23, supervisor:206.02, asistente_gerente:189.54, gerente:173.07 },
+  { cod:"063", nombre:"Aloe Moisturizing Lotion 118ml", cat:"Cuidado de la piel", cc:0.059, publico:329, preferente:311.81, asistente_supervisor:232.23, supervisor:206.02, asistente_gerente:189.54, gerente:173.07 },
+  { cod:"064", nombre:"Aloe Heat Lotion 118ml", cat:"Cuidado de la piel", cc:0.059, publico:329, preferente:311.81, asistente_supervisor:232.23, supervisor:206.02, asistente_gerente:189.54, gerente:173.07 },
+  { cod:"070", nombre:"Gentleman's Pride 118ml", cat:"Cuidado de la piel", cc:0.059, publico:329, preferente:311.81, asistente_supervisor:232.23, supervisor:206.02, asistente_gerente:189.54, gerente:173.07 },
+  { cod:"205", nombre:"Forever Aloe MSM Gel 118ml", cat:"Cuidado de la piel", cc:0.082, publico:457, preferente:433.61, asistente_supervisor:321.55, supervisor:285.13, asistente_gerente:262.16, gerente:239.42 },
+  { cod:"238", nombre:"Aloe Scrub 99g", cat:"Cuidado de la piel", cc:0.064, publico:357, preferente:338.26, asistente_supervisor:251.49, supervisor:222.95, asistente_gerente:205.09, gerente:187.46 },
+  { cod:"553", nombre:"Infinite Skin Care Kit", cat:"Cuidado de la piel", cc:0.749, publico:4171, preferente:3962.56, asistente_supervisor:2919.02, supervisor:2585.41, asistente_gerente:2376.84, gerente:2168.27 },
+  { cod:"554", nombre:"Infinite Hydrating Cleanser 118ml", cat:"Cuidado de la piel", cc:0.131, publico:730, preferente:692.52, asistente_supervisor:512.49, supervisor:454.02, asistente_gerente:417.60, gerente:381.18 },
+  { cod:"555", nombre:"Infinite Firming Serum 30ml", cat:"Cuidado de la piel", cc:0.208, publico:1159, preferente:1100.14, asistente_supervisor:812.23, supervisor:719.66, asistente_gerente:661.66, gerente:603.66 },
+  { cod:"556", nombre:"Infinite Forever Firming Complex 60 Tab.", cat:"Cuidado de la piel", cc:0.207, publico:1153, preferente:1094.81, asistente_supervisor:808.29, supervisor:716.18, asistente_gerente:658.42, gerente:600.88 },
+  { cod:"558", nombre:"Infinite Restoring Creme 48.5g", cat:"Cuidado de la piel", cc:0.232, publico:1293, preferente:1227.51, asistente_supervisor:905.73, supervisor:802.26, asistente_gerente:737.76, gerente:673.26 },
+  { cod:"559", nombre:"Smoothing Exfoliator 60ml", cat:"Cuidado de la piel", cc:0.073, publico:407, preferente:385.58, asistente_supervisor:286.52, supervisor:254.04, asistente_gerente:233.86, gerente:213.44 },
+  { cod:"561", nombre:"Awakening Eye Cream 21g", cat:"Cuidado de la piel", cc:0.073, publico:407, preferente:385.58, asistente_supervisor:286.52, supervisor:254.04, asistente_gerente:233.86, gerente:213.44 },
+  { cod:"605", nombre:"Sonya Refreshing Gel Cleanser 118ml", cat:"Cuidado de la piel", cc:0.094, publico:523, preferente:497.18, asistente_supervisor:368.42, supervisor:326.66, asistente_gerente:300.44, gerente:274.22 },
+  { cod:"606", nombre:"Sonya Illuminating Gel 28.3g", cat:"Cuidado de la piel", cc:0.089, publico:496, preferente:470.73, asistente_supervisor:348.93, supervisor:309.26, asistente_gerente:284.43, gerente:259.84 },
+  { cod:"607", nombre:"Sonya Refining Gel Mask 59ml", cat:"Cuidado de la piel", cc:0.094, publico:523, preferente:497.18, asistente_supervisor:368.42, supervisor:326.66, asistente_gerente:300.44, gerente:274.22 },
+  { cod:"608", nombre:"Sonya Soothing Gel Moisturizer 59ml", cat:"Cuidado de la piel", cc:0.103, publico:574, preferente:544.50, asistente_supervisor:403.22, supervisor:357.28, asistente_gerente:328.74, gerente:299.98 },
+  { cod:"609", nombre:"Sonya Daily Skincare System", cat:"Cuidado de la piel", cc:0.341, publico:1899, preferente:1804.03, asistente_supervisor:1330.29, supervisor:1178.33, asistente_gerente:1083.44, gerente:988.55 },
+  { cod:"612", nombre:"Aloe Activator 130ml", cat:"Cuidado de la piel", cc:0.064, publico:365, preferente:346.38, asistente_supervisor:257.52, supervisor:228.29, asistente_gerente:210.19, gerente:191.86 },
+  { cod:"617", nombre:"Aloe Sunscreen 118ml", cat:"Cuidado de la piel", cc:0.083, publico:462, preferente:438.94, asistente_supervisor:325.50, supervisor:288.61, asistente_gerente:265.41, gerente:242.44 },
+  { cod:"618", nombre:"Hydrating Serum 50ml", cat:"Cuidado de la piel", cc:0.140, publico:780, preferente:740.78, asistente_supervisor:547.65, supervisor:485.34, asistente_gerente:446.37, gerente:407.39 },
+  { cod:"645", nombre:"Protecting Day Lotion 60ml", cat:"Cuidado de la piel", cc:0.146, publico:810, preferente:771.40, asistente_supervisor:570.95, supervisor:505.99, asistente_gerente:465.39, gerente:424.79 },
+  { cod:"646", nombre:"Aloe Body Wash 236ml", cat:"Cuidado de la piel", cc:0.090, publico:501, preferente:475.83, asistente_supervisor:352.87, supervisor:312.74, asistente_gerente:287.68, gerente:262.86 },
+  { cod:"647", nombre:"Aloe Body Lotion 236ml", cat:"Cuidado de la piel", cc:0.091, publico:507, preferente:481.40, asistente_supervisor:356.82, supervisor:316.22, asistente_gerente:290.93, gerente:265.64 },
+  { cod:"651", nombre:"Deep Moisturizing Lotion 71g", cat:"Cuidado de la piel", cc:0.148, publico:824, preferente:782.30, asistente_supervisor:578.61, supervisor:512.72, asistente_gerente:471.66, gerente:430.36 },
+  { cod:"652", nombre:"Tightening Mask Powder 29g", cat:"Cuidado de la piel", cc:0.084, publico:468, preferente:440.51, asistente_supervisor:329.44, supervisor:292.09, asistente_gerente:268.66, gerente:245.22 },
+  { cod:"653", nombre:"Replenishing Skin Oil 29g", cat:"Cuidado de la piel", cc:0.121, publico:674, preferente:639.39, asistente_supervisor:473.51, supervisor:419.69, asistente_gerente:386.05, gerente:352.41 },
+
+  // === COMBOS ===
+  { cod:"001", nombre:"Touch of Forever", cat:"Combos", cc:2.000, publico:11139, preferente:10580.82, asistente_supervisor:7791.02, supervisor:6899.91, asistente_gerente:6343.11, gerente:5786.31 },
+  { cod:"075", nombre:"Mini Touch Forever Nutrición", cat:"Combos", cc:1.000, publico:5587, preferente:5306.77, asistente_supervisor:3896.44, supervisor:3449.61, asistente_gerente:3170.22, gerente:2890.95 },
+  { cod:"216", nombre:"Clean 9 Therm", cat:"Combos", cc:0.571, publico:3178, preferente:3019.94, asistente_supervisor:2226.50, supervisor:1972.23, asistente_gerente:1813.31, gerente:1654.39 },
+  { cod:"217", nombre:"Clean 9 Lean", cat:"Combos", cc:0.624, publico:3473, preferente:3299.04, asistente_supervisor:2432.52, supervisor:2154.58, asistente_gerente:1981.05, gerente:1807.28 },
+  { cod:"220", nombre:"Clean 9 Business Pak", cat:"Combos", cc:2.000, publico:11138, preferente:10580.82, asistente_supervisor:7791.02, supervisor:6899.91, asistente_gerente:6343.11, gerente:5786.31 },
+  { cod:"456", nombre:"Vital 5 Aloe Vera Gel", cat:"Combos", cc:1.000, publico:5587, preferente:5306.77, asistente_supervisor:3896.44, supervisor:3449.61, asistente_gerente:3170.28, gerente:2890.95 },
+  { cod:"801", nombre:"Fast Start TMP (combos nutricionales)", cat:"Combos", cc:2.000, publico:8354, preferente:7937.18, asistente_supervisor:0, supervisor:0, asistente_gerente:0, gerente:0 },
+  { cod:"902", nombre:"Fast Start TMP (más vendidos)", cat:"Combos", cc:2.000, publico:8358, preferente:7941.13, asistente_supervisor:0, supervisor:0, asistente_gerente:0, gerente:0 },
+];
+
+// ================================================================
+// ESTADO GLOBAL DE LA APP
+// ================================================================
+let DB = {
+  clientes: [],
+  prospectos: [],
+  compras: [],
+  citas: [],
+  movimientos: [],
+  inventario: {},  // cod -> stock
+  config: {
+    gsUrl: '', gsId: '', nombre: '', nivel: 'Asistente de Gerente',
+    listaDefault: 'asistente_gerente', ciudad: 'Mazatlán, Sinaloa',
+    diasAlerta: 5
+  }
+};
+
+let editandoClienteId = null;
+let editandoProspectoId = null;
+let filtroEtapa = '';
+let filtroCat = '';
+let calMes = new Date().getMonth();
+let calAnio = new Date().getFullYear();
+let calDiaSeleccionado = null;
+
+// ================================================================
+// PERSISTENCIA LOCAL
+// ================================================================
+function guardarDB() {
+  try { localStorage.setItem('crm_fl_db', JSON.stringify(DB)); } catch(e) {}
+}
+
+function cargarDB() {
+  try {
+    const s = localStorage.getItem('crm_fl_db');
+    if (s) DB = JSON.parse(s);
+  } catch(e) {}
+}
+
+function guardarConfig() {
+  DB.config.gsUrl = document.getElementById('gs-url').value;
+  DB.config.gsId = document.getElementById('gs-id').value;
+  DB.config.nombre = document.getElementById('cfg-nombre').value;
+  DB.config.nivel = document.getElementById('cfg-nivel').value;
+  DB.config.listaDefault = document.getElementById('cfg-lista-default').value;
+  DB.config.ciudad = document.getElementById('cfg-ciudad').value;
+  DB.config.diasAlerta = parseInt(document.getElementById('cfg-dias-alerta').value) || 5;
+  guardarDB();
+}
+
+function cargarCamposConfig() {
+  document.getElementById('gs-url').value = DB.config.gsUrl || '';
+  document.getElementById('gs-id').value = DB.config.gsId || '';
+  document.getElementById('cfg-nombre').value = DB.config.nombre || '';
+  document.getElementById('cfg-nivel').value = DB.config.nivel || '';
+  document.getElementById('cfg-lista-default').value = DB.config.listaDefault || 'asistente_gerente';
+  document.getElementById('cfg-ciudad').value = DB.config.ciudad || '';
+  document.getElementById('cfg-dias-alerta').value = DB.config.diasAlerta || 5;
+}
+
+// ================================================================
+// NAVEGACIÓN
+// ================================================================
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'inventario') renderInventario();
+  if (id === 'clientes') renderClientes();
+  if (id === 'prospectos') renderProspectos();
+  if (id === 'seguimiento') poblarSelectClientes();
+  if (id === 'calendario') renderCalendario();
+  if (id === 'dashboard') actualizarDashboard();
+}
+
+// ================================================================
+// TOAST
+// ================================================================
+function toast(msg, tipo='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = tipo === 'error' ? '#C0392B' : '#111';
+  t.style.color = tipo === 'error' ? '#fff' : 'var(--gold)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ================================================================
+// MODALES
+// ================================================================
+function abrirModalCliente() {
+  editandoClienteId = null;
+  limpiarModal('c-nombre','c-tel-movil','c-tel-casa','c-tel-trabajo','c-email','c-direccion','c-producto','c-notas','c-fecha-entrega');
+  document.getElementById('c-fecha-compra').value = hoy();
+  document.getElementById('c-dias-duracion').value = 30;
+  poblarDatalistProductos('lista-prods-c');
+  abrirModal('modal-cliente');
+}
+
+function abrirModalProspecto() {
+  editandoProspectoId = null;
+  limpiarModal('p-nombre','p-telefono','p-email','p-interes','p-notas','p-fecha-cita','p-hora-cita');
+  abrirModal('modal-prospecto');
+}
+
+function abrirModalCita() {
+  limpiarModal('ev-titulo','ev-persona','ev-notas','ev-hora');
+  document.getElementById('ev-fecha').value = hoy();
+  abrirModal('modal-cita');
+}
+
+function abrirModalMovimiento() {
+  limpiarModal('mv-producto','mv-origen','mv-notas');
+  document.getElementById('mv-fecha').value = hoy();
+  document.getElementById('mv-cantidad').value = 1;
+  poblarDatalistProductos('lista-prods-mv');
+  abrirModal('modal-movimiento');
+}
+
+function abrirModalProducto() {
+  toast('Para agregar productos personalizados usa "Registrar movimiento" con tipo Entrada.', 'ok');
+}
+
+function abrirModalSeguimiento() { abrirModalMovimiento(); }
+
+function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function limpiarModal(...ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+// ================================================================
+// UTILS
+// ================================================================
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function hoy() { return new Date().toISOString().slice(0,10); }
+function formatFecha(f) {
+  if (!f) return '—';
+  const d = new Date(f + 'T12:00:00');
+  return d.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+}
+function formatPrecio(n) {
+  if (!n || n === 0) return '—';
+  return '$' + parseFloat(n).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function diasRestantes(fechaCompra, diasDuracion) {
+  if (!fechaCompra) return null;
+  const compra = new Date(fechaCompra + 'T12:00:00');
+  const agotamiento = new Date(compra.getTime() + diasDuracion * 86400000);
+  const hoyD = new Date();
+  return Math.ceil((agotamiento - hoyD) / 86400000);
+}
+function coloresBadge(dias) {
+  if (dias === null) return 'b-gray';
+  if (dias <= 0) return 'b-red';
+  if (dias <= 7) return 'b-red';
+  if (dias <= 15) return 'b-gold';
+  return 'b-green';
+}
+function textoDias(dias) {
+  if (dias === null) return '—';
+  if (dias <= 0) return 'Agotado';
+  return dias + ' días';
+}
+function initiales(nombre) {
+  if (!nombre) return '?';
+  return nombre.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+function avatarColor(nombre) {
+  const cols = ['av-gold','av-green','av-blue'];
+  return cols[(nombre||'').charCodeAt(0) % 3];
+}
+function poblarDatalistProductos(dlId) {
+  const dl = document.getElementById(dlId);
+  if (!dl) return;
+  dl.innerHTML = PRODUCTOS_FL.map(p => `<option value="${p.nombre}">`).join('');
+}
+
+// ================================================================
+// CLIENTES
+// ================================================================
+function guardarCliente() {
+  const nombre = document.getElementById('c-nombre').value.trim();
+  if (!nombre) { toast('El nombre es obligatorio', 'error'); return; }
+  const cliente = {
+    id: editandoClienteId || uid(),
+    nombre,
+    telMovil: document.getElementById('c-tel-movil').value,
+    telCasa: document.getElementById('c-tel-casa').value,
+    telTrabajo: document.getElementById('c-tel-trabajo').value,
+    email: document.getElementById('c-email').value,
+    direccion: document.getElementById('c-direccion').value,
+    producto: document.getElementById('c-producto').value,
+    lista: document.getElementById('c-lista').value,
+    fechaCompra: document.getElementById('c-fecha-compra').value,
+    diasDuracion: parseInt(document.getElementById('c-dias-duracion').value) || 30,
+    fechaEntrega: document.getElementById('c-fecha-entrega').value,
+    horaEntrega: document.getElementById('c-hora-entrega').value,
+    notas: document.getElementById('c-notas').value,
+    creado: new Date().toISOString()
+  };
+  if (editandoClienteId) {
+    const idx = DB.clientes.findIndex(c=>c.id===editandoClienteId);
+    if (idx>-1) DB.clientes[idx] = cliente;
+  } else {
+    DB.clientes.push(cliente);
+  }
+  guardarDB();
+  cerrarModal('modal-cliente');
+  renderClientes();
+  actualizarDashboard();
+  toast(editandoClienteId ? 'Cliente actualizado ✓' : 'Cliente guardado ✓');
+  editandoClienteId = null;
+  syncGS('clientes', DB.clientes);
+}
+
+function renderClientes() {
+  const buscar = (document.getElementById('buscar-cliente')?.value||'').toLowerCase();
+  let lista = DB.clientes.filter(c =>
+    c.nombre.toLowerCase().includes(buscar) ||
+    (c.telMovil||'').includes(buscar) ||
+    (c.producto||'').toLowerCase().includes(buscar)
+  );
+  document.getElementById('total-clientes').textContent = lista.length + ' cliente' + (lista.length!==1?'s':'');
+  const tbody = document.getElementById('tabla-clientes');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-hint);padding:24px">Sin clientes. Agrega el primero con el botón amarillo.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = lista.map(c => {
+    const dias = diasRestantes(c.fechaCompra, c.diasDuracion);
+    return `<tr>
+      <td><span class="avatar ${avatarColor(c.nombre)}" style="margin-right:8px">${initiales(c.nombre)}</span>${c.nombre}</td>
+      <td>${c.telMovil||'—'}</td>
+      <td>${c.producto||'—'}</td>
+      <td>${formatFecha(c.fechaCompra)}</td>
+      <td><span class="badge ${coloresBadge(dias)}">${textoDias(dias)}</span></td>
+      <td><span class="badge ${dias!==null&&dias<=DB.config.diasAlerta?'b-red':'b-green'}">${dias!==null&&dias<=DB.config.diasAlerta?'Recompra':'Al día'}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-outline btn-sm" onclick="verCliente('${c.id}')">Ver</button>
+        <button class="btn btn-outline btn-sm" onclick="editarCliente('${c.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminarCliente('${c.id}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function verCliente(id) {
+  const c = DB.clientes.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('dc-nombre').textContent = c.nombre;
+  document.getElementById('dc-tel-movil').textContent = c.telMovil||'—';
+  document.getElementById('dc-tel-casa').textContent = c.telCasa||'—';
+  document.getElementById('dc-tel-trabajo').textContent = c.telTrabajo||'—';
+  document.getElementById('dc-email').textContent = c.email||'—';
+  document.getElementById('dc-dir').textContent = c.direccion||'—';
+  const mapsUrl = c.direccion ? `https://www.google.com/maps/search/${encodeURIComponent(c.direccion)}` : '#';
+  document.getElementById('dc-maps').href = mapsUrl;
+  document.getElementById('dc-producto').textContent = c.producto||'—';
+  document.getElementById('dc-lista').textContent = c.lista||'—';
+  const dias = diasRestantes(c.fechaCompra, c.diasDuracion);
+  document.getElementById('dc-dias').textContent = textoDias(dias);
+  document.getElementById('dc-entrega').textContent = c.fechaEntrega ? `${formatFecha(c.fechaEntrega)} ${c.horaEntrega||''}` : '—';
+  document.getElementById('dc-notas').textContent = c.notas||'—';
+  document.getElementById('detalle-cliente').style.display = 'block';
+}
+
+function editarCliente(id) {
+  const c = DB.clientes.find(x=>x.id===id);
+  if (!c) return;
+  editandoClienteId = id;
+  poblarDatalistProductos('lista-prods-c');
+  document.getElementById('c-nombre').value = c.nombre;
+  document.getElementById('c-tel-movil').value = c.telMovil||'';
+  document.getElementById('c-tel-casa').value = c.telCasa||'';
+  document.getElementById('c-tel-trabajo').value = c.telTrabajo||'';
+  document.getElementById('c-email').value = c.email||'';
+  document.getElementById('c-direccion').value = c.direccion||'';
+  document.getElementById('c-producto').value = c.producto||'';
+  document.getElementById('c-lista').value = c.lista||'Público en general';
+  document.getElementById('c-fecha-compra').value = c.fechaCompra||'';
+  document.getElementById('c-dias-duracion').value = c.diasDuracion||30;
+  document.getElementById('c-fecha-entrega').value = c.fechaEntrega||'';
+  document.getElementById('c-hora-entrega').value = c.horaEntrega||'';
+  document.getElementById('c-notas').value = c.notas||'';
+  abrirModal('modal-cliente');
+}
+
+function eliminarCliente(id) {
+  if (!confirm('¿Eliminar este cliente?')) return;
+  DB.clientes = DB.clientes.filter(c=>c.id!==id);
+  guardarDB();
+  renderClientes();
+  actualizarDashboard();
+  document.getElementById('detalle-cliente').style.display='none';
+  toast('Cliente eliminado');
+}
+
+// ================================================================
+// PROSPECTOS
+// ================================================================
+function guardarProspecto() {
+  const nombre = document.getElementById('p-nombre').value.trim();
+  if (!nombre) { toast('El nombre es obligatorio', 'error'); return; }
+  const p = {
+    id: editandoProspectoId || uid(),
+    nombre,
+    telefono: document.getElementById('p-telefono').value,
+    email: document.getElementById('p-email').value,
+    interes: document.getElementById('p-interes').value,
+    tipoCita: document.getElementById('p-tipo-cita').value,
+    fechaCita: document.getElementById('p-fecha-cita').value,
+    horaCita: document.getElementById('p-hora-cita').value,
+    etapa: document.getElementById('p-etapa').value,
+    notas: document.getElementById('p-notas').value,
+    creado: new Date().toISOString()
+  };
+  if (editandoProspectoId) {
+    const idx = DB.prospectos.findIndex(x=>x.id===editandoProspectoId);
+    if (idx>-1) DB.prospectos[idx] = p;
+  } else {
+    DB.prospectos.push(p);
+  }
+  // Si tiene cita, agregarla al calendario
+  if (p.fechaCita) {
+    const cita = { id:uid(), titulo:`Cita: ${p.nombre}`, tipo:'Cita con prospecto', persona:p.nombre, fecha:p.fechaCita, hora:p.horaCita, notas:`${p.tipoCita||''} · ${p.interes||''}`, creado:new Date().toISOString() };
+    DB.citas.push(cita);
+  }
+  guardarDB();
+  cerrarModal('modal-prospecto');
+  renderProspectos();
+  actualizarDashboard();
+  toast('Prospecto guardado ✓');
+  editandoProspectoId = null;
+}
+
+function renderProspectos() {
+  let lista = DB.prospectos;
+  if (filtroEtapa) lista = lista.filter(p=>p.etapa===filtroEtapa);
+  const tbody = document.getElementById('tabla-prospectos');
+  // Conteos
+  ['Nuevo','Contactado','Cita','Cliente'].forEach(etapa => {
+    const el = document.getElementById('cnt-'+etapa.toLowerCase());
+    if (el) el.textContent = DB.prospectos.filter(p=>p.etapa===etapa).length;
+  });
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-hint);padding:24px">Sin prospectos' + (filtroEtapa?' en esta etapa.':'. Agrega el primero.') + '</td></tr>';
+    return;
+  }
+  const etapaClass = { 'Nuevo':'b-blue','Contactado':'b-gold','Cita':'b-gold','Cliente':'b-green' };
+  tbody.innerHTML = lista.map(p => `<tr>
+    <td><span class="avatar ${avatarColor(p.nombre)}" style="margin-right:8px">${initiales(p.nombre)}</span>${p.nombre}</td>
+    <td>${p.telefono||'—'}</td>
+    <td>${p.interes||'—'}</td>
+    <td>${p.tipoCita||'—'}</td>
+    <td>${p.fechaCita ? formatFecha(p.fechaCita) + (p.horaCita?' '+p.horaCita:'') : '—'}</td>
+    <td><span class="badge ${etapaClass[p.etapa]||'b-gray'}">${p.etapa}</span></td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-outline btn-sm" onclick="editarProspecto('${p.id}')">Editar</button>
+      <button class="btn btn-danger btn-sm" onclick="eliminarProspecto('${p.id}')">✕</button>
+    </td>
+  </tr>`).join('');
+}
+
+function filtrarEtapa(etapa) { filtroEtapa = etapa; renderProspectos(); }
+
+function editarProspecto(id) {
+  const p = DB.prospectos.find(x=>x.id===id);
+  if (!p) return;
+  editandoProspectoId = id;
+  document.getElementById('p-nombre').value = p.nombre;
+  document.getElementById('p-telefono').value = p.telefono||'';
+  document.getElementById('p-email').value = p.email||'';
+  document.getElementById('p-interes').value = p.interes||'';
+  document.getElementById('p-tipo-cita').value = p.tipoCita||'';
+  document.getElementById('p-fecha-cita').value = p.fechaCita||'';
+  document.getElementById('p-hora-cita').value = p.horaCita||'';
+  document.getElementById('p-etapa').value = p.etapa||'Nuevo';
+  document.getElementById('p-notas').value = p.notas||'';
+  abrirModal('modal-prospecto');
+}
+
+function eliminarProspecto(id) {
+  if (!confirm('¿Eliminar este prospecto?')) return;
+  DB.prospectos = DB.prospectos.filter(p=>p.id!==id);
+  guardarDB(); renderProspectos(); actualizarDashboard(); toast('Prospecto eliminado');
+}
+
+// ================================================================
+// SEGUIMIENTO / COMPRAS
+// ================================================================
+function poblarSelectClientes() {
+  const sel = document.getElementById('sel-cliente-seg');
+  sel.innerHTML = '<option value="">— Elige un cliente —</option>' +
+    DB.clientes.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+  // poblar datalist productos seguimiento
+  poblarDatalistProductos('lista-productos-seg');
+}
+
+function verSeguimiento() {
+  const id = document.getElementById('sel-cliente-seg').value;
+  const tl = document.getElementById('timeline-cliente');
+  const pp = document.getElementById('progress-productos');
+  if (!id) {
+    tl.innerHTML = '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text" style="color:var(--text-muted)">Selecciona un cliente</div></div></div>';
+    pp.innerHTML = '<div style="color:var(--text-muted);font-size:12px">Selecciona un cliente</div>';
+    return;
+  }
+  const compras = DB.compras.filter(c=>c.clienteId===id).sort((a,b)=>b.fecha>a.fecha?1:-1);
+  const colors = ['','green','blue'];
+  tl.innerHTML = compras.length ? compras.map((c,i) => `
+    <div class="tl-item">
+      <div class="tl-dot ${colors[i%3]}"></div>
+      <div>
+        <div class="tl-date">${formatFecha(c.fecha)}</div>
+        <div class="tl-text">${c.producto} · ${formatPrecio(c.precio)}</div>
+        <div class="tl-sub">${c.lista||''} ${c.notas?'· '+c.notas:''}</div>
+      </div>
+    </div>`).join('') :
+    '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text" style="color:var(--text-muted)">Sin compras registradas para este cliente</div></div></div>';
+
+  // Progress bars últimas compras
+  const recientes = compras.slice(0,4);
+  if (!recientes.length) {
+    pp.innerHTML = '<div style="color:var(--text-muted);font-size:12px">Sin compras registradas</div>';
+    return;
+  }
+  pp.innerHTML = recientes.map(c => {
+    const dias = diasRestantes(c.fecha, c.diasDuracion||30);
+    const pct = Math.max(0, Math.min(100, dias!==null ? Math.round((dias/(c.diasDuracion||30))*100) : 0));
+    const color = dias===null?'var(--text-hint)':dias<=5?'var(--red)':dias<=15?'var(--gold)':'var(--green)';
+    return `<div class="progress-wrap">
+      <div class="progress-header">
+        <span class="progress-label">${c.producto}</span>
+        <span class="progress-val" style="color:${color}">${textoDias(dias)}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function guardarCompra() {
+  const id = document.getElementById('sel-cliente-seg').value;
+  if (!id) { toast('Selecciona un cliente', 'error'); return; }
+  const producto = document.getElementById('seg-producto').value.trim();
+  if (!producto) { toast('Indica el producto', 'error'); return; }
+  const compra = {
+    id: uid(), clienteId: id,
+    producto, precio: document.getElementById('seg-precio').value,
+    fecha: document.getElementById('seg-fecha').value || hoy(),
+    lista: document.getElementById('seg-lista').value,
+    diasDuracion: parseInt(document.getElementById('seg-dias').value)||30,
+    notas: document.getElementById('seg-notas').value
+  };
+  DB.compras.push(compra);
+  // actualizar cliente
+  const c = DB.clientes.find(x=>x.id===id);
+  if (c) { c.producto = producto; c.fechaCompra = compra.fecha; c.diasDuracion = compra.diasDuracion; }
+  guardarDB();
+  verSeguimiento();
+  actualizarDashboard();
+  toast('Compra registrada ✓');
+  limpiarModal('seg-producto','seg-precio','seg-notas');
+}
+
+// ================================================================
+// CALENDARIO
+// ================================================================
+function guardarCita() {
+  const titulo = document.getElementById('ev-titulo').value.trim();
+  if (!titulo) { toast('El título es obligatorio', 'error'); return; }
+  const cita = {
+    id: uid(), titulo,
+    tipo: document.getElementById('ev-tipo').value,
+    persona: document.getElementById('ev-persona').value,
+    fecha: document.getElementById('ev-fecha').value,
+    hora: document.getElementById('ev-hora').value,
+    notas: document.getElementById('ev-notas').value,
+    creado: new Date().toISOString()
+  };
+  DB.citas.push(cita);
+  guardarDB();
+  cerrarModal('modal-cita');
+  renderCalendario();
+  actualizarDashboard();
+  toast('Evento agendado ✓');
+}
+
+function renderCalendario() {
+  const mesLabel = document.getElementById('cal-mes-label');
+  const grid = document.getElementById('cal-grid');
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  mesLabel.textContent = `${meses[calMes]} ${calAnio}`;
+
+  const primer = new Date(calAnio, calMes, 1).getDay();
+  const dias = new Date(calAnio, calMes+1, 0).getDate();
+  const hoyD = new Date(); const hoyNum = hoyD.getDate();
+  const esEsteMes = hoyD.getMonth()===calMes && hoyD.getFullYear()===calAnio;
+
+  // Eventos del mes
+  const eventosDelMes = DB.citas.filter(ev => {
+    if (!ev.fecha) return false;
+    const d = new Date(ev.fecha+'T12:00:00');
+    return d.getMonth()===calMes && d.getFullYear()===calAnio;
+  });
+  const diasConEvento = new Set(eventosDelMes.map(ev=>new Date(ev.fecha+'T12:00:00').getDate()));
+
+  // Mantener solo los encabezados
+  const heads = grid.querySelectorAll('.cal-head');
+  grid.innerHTML = '';
+  heads.forEach(h=>grid.appendChild(h.cloneNode(true)));
+
+  // Celdas vacías antes del primer día
+  for (let i=0;i<primer;i++) {
+    const d = document.createElement('div');
+    d.className='cal-day other-month'; grid.appendChild(d);
+  }
+  for (let d=1;d<=dias;d++) {
+    const el = document.createElement('div');
+    el.className='cal-day';
+    if (esEsteMes && d===hoyNum) el.classList.add('today');
+    if (diasConEvento.has(d)) el.classList.add('has-event');
+    el.textContent = d;
+    el.onclick = () => mostrarEventosDia(d);
+    grid.appendChild(el);
+  }
+}
+
+function mostrarEventosDia(dia) {
+  calDiaSeleccionado = dia;
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-dia-label').textContent = `${dia} de ${meses[calMes]} ${calAnio}`;
+  const eventos = DB.citas.filter(ev => {
+    if (!ev.fecha) return false;
+    const d = new Date(ev.fecha+'T12:00:00');
+    return d.getDate()===dia && d.getMonth()===calMes && d.getFullYear()===calAnio;
+  });
+  const cont = document.getElementById('lista-eventos');
+  if (!eventos.length) {
+    cont.innerHTML = '<div style="color:var(--text-muted);font-size:12px">Sin eventos este día.</div>';
+    return;
+  }
+  const tipoColor = { 'Entrega a cliente':'alert-green','Cita con prospecto':'alert-blue','Recompra programada':'alert-gold','Llamada de seguimiento':'alert-blue','Plan de negocio':'alert-gold','Otro':'alert-gray' };
+  cont.innerHTML = eventos.map(ev => `
+    <div class="alert-card ${tipoColor[ev.tipo]||'alert-gold'}" style="margin-bottom:8px">
+      <div>
+        <div class="alert-title">${ev.titulo}</div>
+        <div class="alert-sub">${ev.hora||''} ${ev.persona?'· '+ev.persona:''}</div>
+        ${ev.notas?`<div class="alert-sub">${ev.notas}</div>`:''}
+        <div class="alert-actions">
+          <button class="btn btn-danger btn-sm" onclick="eliminarCita('${ev.id}')">Eliminar</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function eliminarCita(id) {
+  if (!confirm('¿Eliminar este evento?')) return;
+  DB.citas = DB.citas.filter(c=>c.id!==id);
+  guardarDB(); renderCalendario(); actualizarDashboard(); toast('Evento eliminado');
+  if (calDiaSeleccionado) mostrarEventosDia(calDiaSeleccionado);
+}
+
+function cambiarMes(dir) {
+  calMes += dir;
+  if (calMes<0){calMes=11;calAnio--;}
+  if (calMes>11){calMes=0;calAnio++;}
+  renderCalendario();
+  document.getElementById('cal-dia-label').textContent = 'Eventos del mes';
+  document.getElementById('lista-eventos').innerHTML = '<div style="color:var(--text-muted);font-size:12px">Haz clic en un día para ver sus eventos.</div>';
+}
+
+// ================================================================
+// INVENTARIO
+// ================================================================
+function filtrarCat(cat, el) {
+  filtroCat = cat;
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderInventario();
+}
+
+function renderInventario() {
+  const lista_activa = document.getElementById('lista-precio-activa').value;
+  let prods = PRODUCTOS_FL;
+  if (filtroCat) prods = prods.filter(p=>p.cat===filtroCat);
+  document.getElementById('total-inv').textContent = prods.length + ' productos';
+  const tbody = document.getElementById('tabla-inventario');
+  tbody.innerHTML = prods.map(p => {
+    const precio = p[lista_activa]||0;
+    const stock = DB.inventario[p.cod]||0;
+    const stockColor = stock===0?'color:var(--text-hint)':stock<=3?'color:var(--red);font-weight:700':'color:var(--green);font-weight:600';
+    return `<tr>
+      <td style="color:var(--text-muted);font-size:11px">${p.cod}</td>
+      <td>${p.nombre}</td>
+      <td><span class="badge b-gray">${p.cat}</span></td>
+      <td style="font-weight:600;color:var(--gold-dark)">${formatPrecio(precio)}</td>
+      <td style="color:var(--text-muted)">${p.cc}</td>
+      <td><span style="${stockColor}">${stock}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-outline btn-sm" onclick="ajustarStock('${p.cod}',1)">+</button>
+        <button class="btn btn-outline btn-sm" onclick="ajustarStock('${p.cod}',-1)">-</button>
+      </td>
+    </tr>`;
+  }).join('');
+  renderMovimientos();
+}
+
+function ajustarStock(cod, delta) {
+  if (!DB.inventario[cod]) DB.inventario[cod]=0;
+  DB.inventario[cod] = Math.max(0, DB.inventario[cod]+delta);
+  guardarDB(); renderInventario();
+}
+
+function guardarMovimiento() {
+  const prod = document.getElementById('mv-producto').value.trim();
+  if (!prod) { toast('Indica el producto', 'error'); return; }
+  const tipo = document.getElementById('mv-tipo').value;
+  const cant = parseInt(document.getElementById('mv-cantidad').value)||1;
+  // Buscar cod del producto
+  const prodFL = PRODUCTOS_FL.find(p=>p.nombre.toLowerCase()===prod.toLowerCase());
+  if (prodFL) {
+    if (!DB.inventario[prodFL.cod]) DB.inventario[prodFL.cod]=0;
+    if (tipo==='entrada') DB.inventario[prodFL.cod]+=cant;
+    else if (tipo==='salida') DB.inventario[prodFL.cod]=Math.max(0,DB.inventario[prodFL.cod]-cant);
+  }
+  const mv = {
+    id:uid(), producto:prod, tipo, cantidad:cant,
+    fecha:document.getElementById('mv-fecha').value||hoy(),
+    origen:document.getElementById('mv-origen').value,
+    lista:document.getElementById('mv-lista').value,
+    notas:document.getElementById('mv-notas').value
+  };
+  DB.movimientos.unshift(mv);
+  guardarDB();
+  cerrarModal('modal-movimiento');
+  renderInventario();
+  toast('Movimiento registrado ✓');
+}
+
+function renderMovimientos() {
+  const tbody = document.getElementById('tabla-movimientos');
+  if (!DB.movimientos.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-hint);padding:16px">Sin movimientos registrados.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = DB.movimientos.slice(0,50).map(mv => `<tr>
+    <td>${formatFecha(mv.fecha)}</td>
+    <td>${mv.producto}</td>
+    <td><span class="badge ${mv.tipo==='entrada'?'b-green':mv.tipo==='salida'?'b-red':'b-gold'}">${mv.tipo}</span></td>
+    <td style="font-weight:600">${mv.tipo==='salida'?'-':'+'} ${mv.cantidad}</td>
+    <td>${mv.origen||'—'}</td>
+    <td style="font-size:11px;color:var(--text-muted)">${mv.lista||'—'}</td>
+    <td style="font-size:11px;color:var(--text-muted)">${mv.notas||''}</td>
+  </tr>`).join('');
+}
+
+// ================================================================
+// DASHBOARD
+// ================================================================
+function actualizarDashboard() {
+  document.getElementById('m-clientes').textContent = DB.clientes.length;
+  document.getElementById('m-prospectos').textContent = DB.prospectos.length;
+
+  // Alertas de recompra
+  const alerta = DB.config.diasAlerta||5;
+  const alertas = DB.clientes.filter(c=>{
+    const d = diasRestantes(c.fechaCompra, c.diasDuracion);
+    return d!==null && d<=alerta;
+  });
+  document.getElementById('m-alertas').textContent = alertas.length;
+  document.getElementById('badge-alertas').textContent = alertas.length;
+  document.getElementById('badge-alertas').style.display = alertas.length?'':'none';
+
+  // Citas esta semana
+  const hoyD = new Date(); const fin = new Date(hoyD.getTime()+7*86400000);
+  const citasSem = DB.citas.filter(ev=>{
+    if (!ev.fecha) return false;
+    const d = new Date(ev.fecha+'T12:00:00');
+    return d>=hoyD && d<=fin;
+  });
+  document.getElementById('m-citas').textContent = citasSem.length;
+
+  // Lista alertas
+  const laEl = document.getElementById('lista-alertas');
+  if (!alertas.length) {
+    laEl.innerHTML = '<div class="alert-card alert-green"><div class="alert-icon">✅</div><div><div class="alert-title">Sin alertas pendientes</div><div class="alert-sub">Todos los clientes al día</div></div></div>';
+  } else {
+    laEl.innerHTML = alertas.map(c=>{
+      const dias = diasRestantes(c.fechaCompra, c.diasDuracion);
+      return `<div class="alert-card ${dias<=0?'alert-red':'alert-gold'}">
+        <div class="alert-icon">${dias<=0?'🔴':'⏰'}</div>
+        <div>
+          <div class="alert-title">${c.nombre} — ${c.producto||'Producto'}</div>
+          <div class="alert-sub">${dias<=0?'Producto agotado':'Faltan '+dias+' días'} · ${c.telMovil||'Sin teléfono'}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Lista citas
+  const lcEl = document.getElementById('lista-citas-dash');
+  if (!citasSem.length) {
+    lcEl.innerHTML = '<div class="alert-card alert-blue"><div class="alert-icon">📌</div><div><div class="alert-title">Sin citas esta semana</div></div></div>';
+  } else {
+    lcEl.innerHTML = citasSem.map(ev=>`
+      <div class="alert-card alert-blue">
+        <div class="alert-icon">📅</div>
+        <div>
+          <div class="alert-title">${ev.titulo}</div>
+          <div class="alert-sub">${formatFecha(ev.fecha)} ${ev.hora||''} ${ev.persona?'· '+ev.persona:''}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ================================================================
+// GOOGLE SHEETS SYNC
+// ================================================================
+async function syncGS(tabla, datos) {
+  if (!DB.config.gsUrl) return;
+  try {
+    await fetch(DB.config.gsUrl, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accion:'guardar', tabla, datos })
+    });
+  } catch(e) {}
+}
+
+async function probarConexion() {
+  const url = document.getElementById('gs-url').value.trim();
+  if (!url) { toast('Ingresa primero la URL del Web App', 'error'); return; }
+  const dot = document.getElementById('gsDot');
+  const txt = document.getElementById('gsText');
+  txt.textContent = 'Probando...';
+  try {
+    const r = await fetch(url+'?test=1');
+    const j = await r.json();
+    if (j.ok) {
+      dot.className='gs-dot connected';
+      txt.textContent = 'Conectado';
+      toast('¡Google Sheets conectado! ✓');
+    } else throw new Error();
+  } catch {
+    dot.className='gs-dot error';
+    txt.textContent = 'Error de conexión';
+    toast('No se pudo conectar. Verifica la URL y permisos del Web App.', 'error');
+  }
+}
+
+// ================================================================
+// GOOGLE APPS SCRIPT — TEMPLATE
+// ================================================================
+const GAS_SCRIPT = `// ============================================================
+// Google Apps Script para CRM Forever Living
+// Pegar en: Extensions → Apps Script → Guardar → Deploy
+// Tipo: Web App | Acceso: Anyone
+// ============================================================
+
+const SHEET_ID = 'REEMPLAZA_CON_TU_SHEET_ID';
+const TABLAS = ['Clientes','Prospectos','Compras','Citas','Inventario'];
+
+function doGet(e) {
+  if (e.parameter.test) return respuesta({ok:true, msg:'CRM Forever Living OK'});
+  const tabla = e.parameter.tabla;
+  if (!tabla) return respuesta({ok:false, msg:'Sin tabla'});
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(tabla);
+  if (!sheet) return respuesta({ok:false, msg:'Hoja no encontrada: '+tabla});
+  const rows = sheet.getDataRange().getValues();
+  return respuesta({ok:true, datos:rows});
+}
+
+function doPost(e) {
+  const body = JSON.parse(e.postData.contents);
+  const {accion, tabla, datos} = body;
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName(tabla);
+  if (!sheet) sheet = ss.insertSheet(tabla);
+  if (accion === 'guardar') {
+    sheet.clearContents();
+    if (datos && datos.length > 0) {
+      const headers = Object.keys(datos[0]);
+      sheet.getRange(1,1,1,headers.length).setValues([headers]);
+      const rows = datos.map(r => headers.map(h => r[h]||''));
+      sheet.getRange(2,1,rows.length,headers.length).setValues(rows);
+    }
+    return respuesta({ok:true});
+  }
+  return respuesta({ok:false, msg:'Acción desconocida'});
+}
+
+function respuesta(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+function generarScript() {
+  document.getElementById('script-content').textContent = GAS_SCRIPT;
+  abrirModal('modal-script');
+}
+function copiarScript() {
+  navigator.clipboard.writeText(GAS_SCRIPT).then(()=>toast('Script copiado ✓')).catch(()=>toast('Copia el texto manualmente','error'));
+}
+
+// ================================================================
+// EXPORTAR / IMPORTAR
+// ================================================================
+function exportarDatos() {
+  const blob = new Blob([JSON.stringify(DB,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `crm_forever_living_${hoy()}.json`; a.click();
+  toast('Datos exportados ✓');
+}
+function importarDatos() { document.getElementById('import-file').click(); }
+function cargarJSON(input) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const d = JSON.parse(e.target.result);
+      if (d.clientes && d.prospectos) {
+        DB = d; guardarDB(); cargarCamposConfig();
+        renderClientes(); renderProspectos(); renderInventario(); actualizarDashboard();
+        toast('Datos importados ✓');
+      } else { toast('Archivo no válido','error'); }
+    } catch { toast('Error al leer el archivo','error'); }
+  };
+  r.readAsText(file);
+}
+function borrarTodo() {
+  if (!confirm('¿Seguro? Se eliminarán TODOS los datos del CRM. Esta acción es irreversible.')) return;
+  if (!confirm('Segunda confirmación: ¿realmente borrar todo?')) return;
+  localStorage.removeItem('crm_fl_db');
+  DB = { clientes:[], prospectos:[], compras:[], citas:[], movimientos:[], inventario:{}, config:DB.config };
+  guardarDB(); renderClientes(); renderProspectos(); renderInventario(); actualizarDashboard();
+  toast('Datos eliminados');
+}
+
+// ================================================================
+// INICIO
+// ================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  cargarDB();
+  cargarCamposConfig();
+  renderInventario();
+  actualizarDashboard();
+  renderCalendario();
+
+  // Fecha en topbar
+  const fechaEl = document.getElementById('fecha-hoy');
+  if (fechaEl) {
+    const d = new Date();
+    fechaEl.textContent = d.toLocaleDateString('es-MX', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  }
+
+  // Cerrar modal al hacer clic fuera
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  // Status GS inicial
+  if (DB.config.gsUrl) {
+    document.getElementById('gsDot').className='gs-dot connected';
+    document.getElementById('gsText').textContent = 'URL configurada';
+  }
+});
+</script>
+</body>
+</html>
