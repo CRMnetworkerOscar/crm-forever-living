@@ -928,6 +928,16 @@ tr:hover td { background: #FFFDF0; }
     <button class="btn btn-gold" onclick="abrirModalProducto()">+ Agregar producto</button>
   </div>
 
+  <div class="search-bar" style="margin-bottom:10px">
+    <span style="font-size:16px;color:var(--text-muted)">🔍</span>
+    <input class="search-input" type="text" id="buscar-inv"
+      placeholder="Buscar producto por nombre o código..."
+      oninput="renderInventario()"
+      style="max-width:420px">
+    <button class="btn btn-outline btn-sm" onclick="limpiarBusquedaInv()" title="Limpiar búsqueda"
+      style="color:var(--text-muted)">✕ Limpiar</button>
+    <span id="inv-resultados" style="font-size:11px;color:var(--text-muted);margin-left:4px"></span>
+  </div>
   <div class="inv-filters">
     <div class="cat-pill active" onclick="filtrarCat('',this)">Todos</div>
     <div class="cat-pill" onclick="filtrarCat('Bebidas',this)">Bebidas</div>
@@ -2053,11 +2063,38 @@ function filtrarCat(cat, el) {
   renderInventario();
 }
 
+function limpiarBusquedaInv() {
+  const inp = document.getElementById('buscar-inv');
+  if (inp) { inp.value = ''; inp.focus(); }
+  renderInventario();
+}
+
 function renderInventario() {
   const lista_activa = document.getElementById('lista-precio-activa').value;
+  const busqueda = (document.getElementById('buscar-inv')?.value || '').toLowerCase().trim();
   let prods = PRODUCTOS_FL;
-  if (filtroCat) prods = prods.filter(p=>p.cat===filtroCat);
-  document.getElementById('total-inv').textContent = prods.length + ' productos';
+  if (filtroCat) prods = prods.filter(p => p.cat === filtroCat);
+  if (busqueda) {
+    prods = prods.filter(p =>
+      p.nombre.toLowerCase().includes(busqueda) ||
+      p.cod.toLowerCase().includes(busqueda) ||
+      p.cat.toLowerCase().includes(busqueda)
+    );
+  }
+  const total = prods.length;
+  document.getElementById('total-inv').textContent = total + ' producto' + (total !== 1 ? 's' : '');
+  const resEl = document.getElementById('inv-resultados');
+  if (resEl) {
+    if (busqueda && total === 0) {
+      resEl.textContent = '— Sin resultados para "' + busqueda + '"';
+      resEl.style.color = 'var(--red)';
+    } else if (busqueda) {
+      resEl.textContent = total + ' resultado' + (total !== 1 ? 's' : '') + ' para "' + busqueda + '"';
+      resEl.style.color = 'var(--green)';
+    } else {
+      resEl.textContent = '';
+    }
+  }
   const tbody = document.getElementById('tabla-inventario');
   tbody.innerHTML = prods.map(p => {
     const precio = p[lista_activa]||0;
@@ -2065,7 +2102,7 @@ function renderInventario() {
     const stockColor = stock===0?'color:var(--text-hint)':stock<=3?'color:var(--red);font-weight:700':'color:var(--green);font-weight:600';
     return `<tr>
       <td style="color:var(--text-muted);font-size:11px">${p.cod}</td>
-      <td>${p.nombre}</td>
+      <td>${busqueda ? p.nombre.replace(new RegExp(busqueda.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => '<mark style="background:var(--gold-light);color:var(--text);border-radius:2px;padding:0 2px">'+m+'</mark>') : p.nombre}</td>
       <td><span class="badge b-gray">${p.cat}</span></td>
       <td style="font-weight:600;color:var(--gold-dark)">${formatPrecio(precio)}</td>
       <td style="color:var(--text-muted)">${p.cc}</td>
