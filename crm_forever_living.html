@@ -1697,7 +1697,7 @@ function guardarCliente() {
   actualizarDashboard();
   toast(editandoClienteId ? 'Cliente actualizado ✓' : 'Cliente guardado ✓');
   editandoClienteId = null;
-  syncGS('clientes', DB.clientes);
+  syncGS('Clientes', DB.clientes);
 }
 
 function renderClientes() {
@@ -1780,6 +1780,7 @@ function eliminarCliente(id) {
   actualizarDashboard();
   document.getElementById('detalle-cliente').style.display='none';
   toast('Cliente eliminado');
+  syncGS('Clientes', DB.clientes);
 }
 
 // ================================================================
@@ -1817,6 +1818,8 @@ function guardarProspecto() {
   renderProspectos();
   actualizarDashboard();
   toast('Prospecto guardado ✓');
+  syncGS('Prospectos', DB.prospectos);
+  syncGS('Citas', DB.citas);
   editandoProspectoId = null;
 }
 
@@ -1870,6 +1873,7 @@ function eliminarProspecto(id) {
   if (!confirm('¿Eliminar este prospecto?')) return;
   DB.prospectos = DB.prospectos.filter(p=>p.id!==id);
   guardarDB(); renderProspectos(); actualizarDashboard(); toast('Prospecto eliminado');
+  syncGS('Prospectos', DB.prospectos);
 }
 
 // ================================================================
@@ -1946,6 +1950,8 @@ function guardarCompra() {
   verSeguimiento();
   actualizarDashboard();
   toast('Compra registrada ✓');
+  syncGS('Compras', DB.compras);
+  syncGS('Clientes', DB.clientes);
   limpiarModal('seg-producto','seg-precio','seg-notas');
 }
 
@@ -1970,6 +1976,7 @@ function guardarCita() {
   renderCalendario();
   actualizarDashboard();
   toast('Evento agendado ✓');
+  syncGS('Citas', DB.citas);
 }
 
 function renderCalendario() {
@@ -2044,6 +2051,7 @@ function eliminarCita(id) {
   if (!confirm('¿Eliminar este evento?')) return;
   DB.citas = DB.citas.filter(c=>c.id!==id);
   guardarDB(); renderCalendario(); actualizarDashboard(); toast('Evento eliminado');
+  syncGS('Citas', DB.citas);
   if (calDiaSeleccionado) mostrarEventosDia(calDiaSeleccionado);
 }
 
@@ -2122,6 +2130,8 @@ function guardarMovimiento() {
   cerrarModal('modal-movimiento');
   renderInventario();
   toast('Movimiento registrado ✓');
+  syncGS('Inventario', Object.entries(DB.inventario).map(([cod,stock])=>({cod,stock})));
+  syncGS('Compras', DB.movimientos);
 }
 
 function renderMovimientos() {
@@ -2203,35 +2213,106 @@ function actualizarDashboard() {
 // ================================================================
 // GOOGLE SHEETS SYNC
 // ================================================================
+// ================================================================
+// GOOGLE SHEETS — SINCRONIZACIÓN BIDIRECCIONAL COMPLETA
+// ================================================================
+
 async function syncGS(tabla, datos) {
   if (!DB.config.gsUrl) return;
   try {
     await fetch(DB.config.gsUrl, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ accion:'guardar', tabla, datos })
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ accion: 'guardar', tabla, datos })
     });
-  } catch(e) {}
+  } catch(e) { console.warn('syncGS error:', e); }
+}
+
+async function syncTodo() {
+  if (!DB.config.gsUrl) return;
+  setGsStatus('syncing');
+  try {
+    await syncGS('Clientes',   DB.clientes);
+    await syncGS('Prospectos', DB.prospectos);
+    await syncGS('Compras',    DB.compras);
+    await syncGS('Citas',      DB.citas);
+    await syncGS('Inventario', Object.entries(DB.inventario).map(([cod,stock])=>({cod,stock})));
+    setGsStatus('ok');
+    toast('Datos sincronizados con Google Sheets ✓');
+  } catch(e) {
+    setGsStatus('error');
+    toast('Error al sincronizar', 'error');
+  }
+}
+
+async function cargarDesdeGS() {
+  if (!DB.config.gsUrl) return false;
+  setGsStatus('syncing');
+  try {
+    const tablas = ['Clientes','Prospectos','Compras','Citas'];
+    let hayDatos = false;
+    for (const tabla of tablas) {
+      const r = await fetch(`${DB.config.gsUrl}?tabla=${tabla}&t=${Date.now()}`);
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (!j.ok || !j.datos || j.datos.length < 2) continue;
+      const [headers, ...rows] = j.datos;
+      const objetos = rows
+        .filter(row => row.some(cell => cell !== '' && cell !== null))
+        .map(row => { const obj={}; headers.forEach((h,i)=>{ obj[h]=row[i]??'';}); return obj; });
+      if (objetos.length > 0) {
+        hayDatos = true;
+        if (tabla==='Clientes')   DB.clientes   = objetos;
+        if (tabla==='Prospectos') DB.prospectos = objetos;
+        if (tabla==='Compras')    DB.compras    = objetos;
+        if (tabla==='Citas')      DB.citas      = objetos;
+      }
+    }
+    const ri = await fetch(`${DB.config.gsUrl}?tabla=Inventario&t=${Date.now()}`);
+    if (ri.ok) {
+      const ji = await ri.json();
+      if (ji.ok && ji.datos && ji.datos.length >= 2) {
+        const [hd,...rows] = ji.datos;
+        DB.inventario = {};
+        rows.forEach(row => { if(row[0]) DB.inventario[row[0]] = parseInt(row[1])||0; });
+        hayDatos = true;
+      }
+    }
+    if (hayDatos) { guardarDB(); setGsStatus('ok'); return true; }
+    setGsStatus('ok'); return false;
+  } catch(e) { console.warn('Error GS:', e); setGsStatus('error'); return false; }
+}
+
+function setGsStatus(estado) {
+  const dot = document.getElementById('gsDot');
+  const txt = document.getElementById('gsText');
+  if (!dot||!txt) return;
+  dot.style.background = '';
+  if (estado==='ok')      { dot.className='gs-dot connected'; txt.textContent='Sheets conectado'; }
+  else if (estado==='syncing') { dot.className='gs-dot'; dot.style.background='#FFC600'; txt.textContent='Sincronizando...'; }
+  else if (estado==='error')   { dot.className='gs-dot error'; txt.textContent='Error de sync'; }
+  else                          { dot.className='gs-dot'; txt.textContent='Sin conectar'; }
 }
 
 async function probarConexion() {
   const url = document.getElementById('gs-url').value.trim();
   if (!url) { toast('Ingresa primero la URL del Web App', 'error'); return; }
-  const dot = document.getElementById('gsDot');
-  const txt = document.getElementById('gsText');
-  txt.textContent = 'Probando...';
+  setGsStatus('syncing');
   try {
-    const r = await fetch(url+'?test=1');
+    const r = await fetch(`${url}?test=1&t=${Date.now()}`);
     const j = await r.json();
     if (j.ok) {
-      dot.className='gs-dot connected';
-      txt.textContent = 'Conectado';
-      toast('¡Google Sheets conectado! ✓');
+      DB.config.gsUrl = url; guardarDB(); setGsStatus('ok');
+      toast('¡Google Sheets conectado! Cargando datos...');
+      const ok = await cargarDesdeGS();
+      if (ok) {
+        renderClientes(); renderProspectos(); actualizarDashboard(); renderCalendario();
+        toast('✓ Datos cargados desde Google Sheets');
+      } else { toast('Conectado. Aún no hay datos en Sheets — empieza a registrar.'); }
     } else throw new Error();
-  } catch {
-    dot.className='gs-dot error';
-    txt.textContent = 'Error de conexión';
-    toast('No se pudo conectar. Verifica la URL y permisos del Web App.', 'error');
+  } catch(e) {
+    setGsStatus('error');
+    toast('No se pudo conectar. Verifica la URL y que el acceso sea "Cualquier persona".', 'error');
   }
 }
 
@@ -2239,44 +2320,57 @@ async function probarConexion() {
 // GOOGLE APPS SCRIPT — TEMPLATE
 // ================================================================
 const GAS_SCRIPT = `// ============================================================
-// Google Apps Script para CRM Forever Living
-// Pegar en: Extensions → Apps Script → Guardar → Deploy
-// Tipo: Web App | Acceso: Anyone
+// Google Apps Script para CRM Forever Living v2
+// INSTRUCCIONES:
+// 1. Pega este código en Extensions → Apps Script
+// 2. Reemplaza SHEET_ID con el ID de tu Google Sheet
+// 3. Guarda (Ctrl+S)
+// 4. Deploy → Nueva implementación
+//    Tipo: Web App | Ejecutar como: Yo | Acceso: Cualquier persona
+// 5. Copia la URL y pégala en Configuración del CRM
 // ============================================================
 
 const SHEET_ID = 'REEMPLAZA_CON_TU_SHEET_ID';
-const TABLAS = ['Clientes','Prospectos','Compras','Citas','Inventario'];
 
 function doGet(e) {
-  if (e.parameter.test) return respuesta({ok:true, msg:'CRM Forever Living OK'});
-  const tabla = e.parameter.tabla;
-  if (!tabla) return respuesta({ok:false, msg:'Sin tabla'});
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(tabla);
-  if (!sheet) return respuesta({ok:false, msg:'Hoja no encontrada: '+tabla});
-  const rows = sheet.getDataRange().getValues();
-  return respuesta({ok:true, datos:rows});
+  try {
+    if (e.parameter.test) return resp({ok:true, msg:'CRM Forever Living OK'});
+    const tabla = e.parameter.tabla;
+    if (!tabla) return resp({ok:false, msg:'Sin tabla'});
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    let sheet = ss.getSheetByName(tabla);
+    if (!sheet) { ss.insertSheet(tabla); return resp({ok:true, datos:[]}); }
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+    if (lastRow < 1 || lastCol < 1) return resp({ok:true, datos:[]});
+    const datos = sheet.getRange(1,1,lastRow,lastCol).getValues();
+    return resp({ok:true, datos:datos});
+  } catch(err) { return resp({ok:false, msg:err.toString()}); }
 }
 
 function doPost(e) {
-  const body = JSON.parse(e.postData.contents);
-  const {accion, tabla, datos} = body;
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  let sheet = ss.getSheetByName(tabla);
-  if (!sheet) sheet = ss.insertSheet(tabla);
-  if (accion === 'guardar') {
-    sheet.clearContents();
-    if (datos && datos.length > 0) {
-      const headers = Object.keys(datos[0]);
-      sheet.getRange(1,1,1,headers.length).setValues([headers]);
-      const rows = datos.map(r => headers.map(h => r[h]||''));
-      sheet.getRange(2,1,rows.length,headers.length).setValues(rows);
+  try {
+    const body = JSON.parse(e.postData.contents);
+    const {accion, tabla, datos} = body;
+    if (!tabla) return resp({ok:false, msg:'Sin tabla'});
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    let sheet = ss.getSheetByName(tabla);
+    if (!sheet) sheet = ss.insertSheet(tabla);
+    if (accion === 'guardar') {
+      sheet.clearContents();
+      if (datos && datos.length > 0) {
+        const headers = Object.keys(datos[0]);
+        sheet.getRange(1,1,1,headers.length).setValues([headers]);
+        const rows = datos.map(r => headers.map(h => (r[h]===null||r[h]===undefined)?'':r[h]));
+        sheet.getRange(2,1,rows.length,headers.length).setValues(rows);
+      }
+      return resp({ok:true, guardados: datos ? datos.length : 0});
     }
-    return respuesta({ok:true});
-  }
-  return respuesta({ok:false, msg:'Acción desconocida'});
+    return resp({ok:false, msg:'Accion desconocida'});
+  } catch(err) { return resp({ok:false, msg:err.toString()}); }
 }
 
-function respuesta(obj) {
+function resp(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }`;
@@ -2347,11 +2441,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Status GS inicial
+  // Cargar datos desde Google Sheets al abrir
   if (DB.config.gsUrl) {
-    document.getElementById('gsDot').className='gs-dot connected';
-    document.getElementById('gsText').textContent = 'URL configurada';
+    setGsStatus('syncing');
+    cargarDesdeGS().then(cargado => {
+      if (cargado) {
+        renderClientes();
+        renderProspectos();
+        actualizarDashboard();
+        renderCalendario();
+        toast('✓ Datos actualizados desde Google Sheets');
+      } else {
+        setGsStatus('ok');
+      }
+    });
   }
+
+  // Botón de sync manual en topbar
+  const syncBtn = document.createElement('button');
+  syncBtn.className = 'btn btn-outline btn-sm';
+  syncBtn.style.cssText = 'color:#FFC600;border-color:#444;font-size:10px;padding:3px 10px';
+  syncBtn.textContent = '↺ Sincronizar';
+  syncBtn.title = 'Forzar sincronización con Google Sheets';
+  syncBtn.onclick = async () => {
+    syncBtn.textContent = '⏳ Sincronizando...';
+    syncBtn.disabled = true;
+    const ok = await cargarDesdeGS();
+    if (ok) {
+      renderClientes(); renderProspectos(); actualizarDashboard(); renderCalendario();
+      toast('✓ Datos actualizados desde Google Sheets');
+    }
+    await syncTodo();
+    syncBtn.textContent = '↺ Sincronizar';
+    syncBtn.disabled = false;
+  };
+  const topbar = document.querySelector('.topbar');
+  if (topbar) topbar.insertBefore(syncBtn, topbar.querySelector('.topbar-badge'));
 });
 </script>
 </body>
