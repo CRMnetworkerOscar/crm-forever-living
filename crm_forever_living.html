@@ -2233,17 +2233,55 @@ function actualizarDashboard() {
 // GOOGLE SHEETS — SINCRONIZACIÓN BIDIRECCIONAL COMPLETA
 // ================================================================
 
+// ================================================================
+// GOOGLE SHEETS — SINCRONIZACIÓN VÍA JSONP (sin CORS)
+// ================================================================
+
+// Llamada GET via JSONP — lee datos desde Sheets
+function gsGet(url, params) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const qs = Object.entries({...params, callback: cbName, t: Date.now()})
+      .map(([k,v]) => k + '=' + encodeURIComponent(v)).join('&');
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      cleanup(); reject(new Error('Timeout'));
+    }, 10000);
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    script.onerror = () => { cleanup(); reject(new Error('Script error')); };
+    script.src = url + '?' + qs;
+    document.head.appendChild(script);
+  });
+}
+
+// Llamada POST via form submit en iframe oculto — escribe datos en Sheets
+function gsPost(url, accion, tabla, datos) {
+  return new Promise((resolve) => {
+    // Usamos fetch con no-cors para POST (solo escritura, no necesitamos respuesta)
+    const payload = JSON.stringify({ accion, tabla, datos });
+    fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: payload
+    }).then(() => resolve(true)).catch(() => resolve(false));
+  });
+}
+
+// ── Guardar una tabla en Sheets ──
 async function syncGS(tabla, datos) {
   if (!DB.config.gsUrl) return;
   try {
-    await fetch(DB.config.gsUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ accion: 'guardar', tabla, datos })
-    });
-  } catch(e) { console.warn('syncGS error:', e); }
+    await gsPost(DB.config.gsUrl, 'guardar', tabla, datos);
+  } catch(e) { console.warn('syncGS error:', tabla, e); }
 }
 
+// ── Sincronizar TODAS las tablas ──
 async function syncTodo() {
   if (!DB.config.gsUrl) return;
   setGsStatus('syncing');
@@ -2252,80 +2290,90 @@ async function syncTodo() {
     await syncGS('Prospectos', DB.prospectos);
     await syncGS('Compras',    DB.compras);
     await syncGS('Citas',      DB.citas);
-    await syncGS('Inventario', Object.entries(DB.inventario).map(([cod,stock])=>({cod,stock})));
+    const invArr = Object.entries(DB.inventario).map(([cod,stock]) => ({cod, stock}));
+    await syncGS('Inventario', invArr);
     setGsStatus('ok');
-    toast('Datos sincronizados con Google Sheets ✓');
+    toast('✓ Datos sincronizados con Google Sheets');
   } catch(e) {
     setGsStatus('error');
     toast('Error al sincronizar', 'error');
   }
 }
 
+// ── Cargar datos DESDE Sheets (al abrir) ──
 async function cargarDesdeGS() {
   if (!DB.config.gsUrl) return false;
   setGsStatus('syncing');
   try {
-    const tablas = ['Clientes','Prospectos','Compras','Citas'];
+    const tablas = ['Clientes','Prospectos','Compras','Citas','Inventario'];
     let hayDatos = false;
     for (const tabla of tablas) {
-      const r = await fetch(`${DB.config.gsUrl}?tabla=${tabla}&t=${Date.now()}`);
-      if (!r.ok) continue;
-      const j = await r.json();
-      if (!j.ok || !j.datos || j.datos.length < 2) continue;
+      let j;
+      try {
+        j = await gsGet(DB.config.gsUrl, { tabla });
+      } catch(e) { console.warn('Error leyendo', tabla, e); continue; }
+      if (!j || !j.ok || !j.datos || j.datos.length < 2) continue;
       const [headers, ...rows] = j.datos;
       const objetos = rows
-        .filter(row => row.some(cell => cell !== '' && cell !== null))
-        .map(row => { const obj={}; headers.forEach((h,i)=>{ obj[h]=row[i]??'';}); return obj; });
-      if (objetos.length > 0) {
-        hayDatos = true;
-        if (tabla==='Clientes')   DB.clientes   = objetos;
-        if (tabla==='Prospectos') DB.prospectos = objetos;
-        if (tabla==='Compras')    DB.compras    = objetos;
-        if (tabla==='Citas')      DB.citas      = objetos;
-      }
-    }
-    const ri = await fetch(`${DB.config.gsUrl}?tabla=Inventario&t=${Date.now()}`);
-    if (ri.ok) {
-      const ji = await ri.json();
-      if (ji.ok && ji.datos && ji.datos.length >= 2) {
-        const [hd,...rows] = ji.datos;
+        .filter(row => row.some(c => c !== '' && c !== null && c !== undefined))
+        .map(row => {
+          const obj = {};
+          headers.forEach((h, i) => { obj[h] = (row[i] === undefined || row[i] === null) ? '' : row[i]; });
+          return obj;
+        });
+      if (!objetos.length) continue;
+      hayDatos = true;
+      if (tabla === 'Clientes')   DB.clientes   = objetos;
+      if (tabla === 'Prospectos') DB.prospectos = objetos;
+      if (tabla === 'Compras')    DB.compras    = objetos;
+      if (tabla === 'Citas')      DB.citas      = objetos;
+      if (tabla === 'Inventario') {
         DB.inventario = {};
-        rows.forEach(row => { if(row[0]) DB.inventario[row[0]] = parseInt(row[1])||0; });
-        hayDatos = true;
+        objetos.forEach(o => {
+          if (o.cod) DB.inventario[o.cod] = parseInt(o.stock) || 0;
+        });
       }
     }
     if (hayDatos) { guardarDB(); setGsStatus('ok'); return true; }
     setGsStatus('ok'); return false;
-  } catch(e) { console.warn('Error GS:', e); setGsStatus('error'); return false; }
+  } catch(e) {
+    console.warn('cargarDesdeGS error:', e);
+    setGsStatus('error');
+    return false;
+  }
 }
 
 function setGsStatus(estado) {
   const dot = document.getElementById('gsDot');
   const txt = document.getElementById('gsText');
-  if (!dot||!txt) return;
+  if (!dot || !txt) return;
   dot.style.background = '';
-  if (estado==='ok')      { dot.className='gs-dot connected'; txt.textContent='Sheets conectado'; }
-  else if (estado==='syncing') { dot.className='gs-dot'; dot.style.background='#FFC600'; txt.textContent='Sincronizando...'; }
-  else if (estado==='error')   { dot.className='gs-dot error'; txt.textContent='Error de sync'; }
-  else                          { dot.className='gs-dot'; txt.textContent='Sin conectar'; }
+  if (estado === 'ok')       { dot.className='gs-dot connected'; txt.textContent='Sheets conectado'; }
+  else if (estado==='syncing'){ dot.className='gs-dot'; dot.style.background='#FFC600'; txt.textContent='Sincronizando...'; }
+  else if (estado==='error') { dot.className='gs-dot error'; txt.textContent='Error de sync'; }
+  else                       { dot.className='gs-dot'; txt.textContent='Sin conectar'; }
 }
 
 async function probarConexion() {
   const url = document.getElementById('gs-url').value.trim();
   if (!url) { toast('Ingresa primero la URL del Web App', 'error'); return; }
+  DB.config.gsUrl = url;
+  guardarDB();
   setGsStatus('syncing');
   try {
-    const r = await fetch(`${url}?test=1&t=${Date.now()}`);
-    const j = await r.json();
-    if (j.ok) {
-      DB.config.gsUrl = url; guardarDB(); setGsStatus('ok');
+    const j = await gsGet(url, { test: '1' });
+    if (j && j.ok) {
+      setGsStatus('ok');
       toast('¡Google Sheets conectado! Cargando datos...');
       const ok = await cargarDesdeGS();
       if (ok) {
-        renderClientes(); renderProspectos(); actualizarDashboard(); renderCalendario();
+        renderClientes(); renderProspectos(); actualizarDashboard();
+        renderCalendario(); renderInventario();
         toast('✓ Datos cargados desde Google Sheets');
-      } else { toast('Conectado. Aún no hay datos en Sheets — empieza a registrar.'); }
-    } else throw new Error();
+      } else {
+        toast('Conectado. Sin datos en Sheets aún — empieza a registrar.');
+      }
+    } else throw new Error('Respuesta no ok');
   } catch(e) {
     setGsStatus('error');
     toast('No se pudo conectar. Verifica la URL y que el acceso sea "Cualquier persona".', 'error');
@@ -2336,59 +2384,87 @@ async function probarConexion() {
 // GOOGLE APPS SCRIPT — TEMPLATE
 // ================================================================
 const GAS_SCRIPT = `// ============================================================
-// Google Apps Script para CRM Forever Living v2
+// Google Apps Script — CRM Forever Living v3 (JSONP + POST)
 // INSTRUCCIONES:
 // 1. Pega este código en Extensions → Apps Script
-// 2. Reemplaza SHEET_ID con el ID de tu Google Sheet
-// 3. Guarda (Ctrl+S)
+// 2. Reemplaza SHEET_ID con el ID de tu Google Sheets
+// 3. Guarda (Ctrl+S) — nombre: CRM Forever Living API
 // 4. Deploy → Nueva implementación
 //    Tipo: Web App | Ejecutar como: Yo | Acceso: Cualquier persona
-// 5. Copia la URL y pégala en Configuración del CRM
+// 5. Autoriza los permisos y copia la URL /exec
+// 6. Pégala en Configuración del CRM → Probar conexión
 // ============================================================
 
 const SHEET_ID = 'REEMPLAZA_CON_TU_SHEET_ID';
 
+// GET — leer datos o test de conexión (soporta JSONP)
 function doGet(e) {
+  const callback = e.parameter.callback;
   try {
-    if (e.parameter.test) return resp({ok:true, msg:'CRM Forever Living OK'});
+    // Test de conexión
+    if (e.parameter.test) {
+      return out({ok: true, msg: 'CRM Forever Living v3 OK'}, callback);
+    }
+    // Leer tabla
     const tabla = e.parameter.tabla;
-    if (!tabla) return resp({ok:false, msg:'Sin tabla'});
+    if (!tabla) return out({ok: false, msg: 'Sin tabla'}, callback);
+
     const ss = SpreadsheetApp.openById(SHEET_ID);
     let sheet = ss.getSheetByName(tabla);
-    if (!sheet) { ss.insertSheet(tabla); return resp({ok:true, datos:[]}); }
+    if (!sheet) {
+      // Crear la hoja automáticamente si no existe
+      sheet = ss.insertSheet(tabla);
+      return out({ok: true, datos: []}, callback);
+    }
     const lastRow = sheet.getLastRow();
     const lastCol = sheet.getLastColumn();
-    if (lastRow < 1 || lastCol < 1) return resp({ok:true, datos:[]});
-    const datos = sheet.getRange(1,1,lastRow,lastCol).getValues();
-    return resp({ok:true, datos:datos});
-  } catch(err) { return resp({ok:false, msg:err.toString()}); }
+    if (lastRow < 1 || lastCol < 1) {
+      return out({ok: true, datos: []}, callback);
+    }
+    const datos = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+    return out({ok: true, datos: datos}, callback);
+  } catch(err) {
+    return out({ok: false, msg: err.toString()}, callback);
+  }
 }
 
+// POST — guardar/reemplazar tabla completa
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents);
-    const {accion, tabla, datos} = body;
-    if (!tabla) return resp({ok:false, msg:'Sin tabla'});
+    const { accion, tabla, datos } = body;
+    if (!tabla) return out({ok: false, msg: 'Sin tabla'});
+
     const ss = SpreadsheetApp.openById(SHEET_ID);
     let sheet = ss.getSheetByName(tabla);
     if (!sheet) sheet = ss.insertSheet(tabla);
+
     if (accion === 'guardar') {
       sheet.clearContents();
       if (datos && datos.length > 0) {
         const headers = Object.keys(datos[0]);
-        sheet.getRange(1,1,1,headers.length).setValues([headers]);
-        const rows = datos.map(r => headers.map(h => (r[h]===null||r[h]===undefined)?'':r[h]));
-        sheet.getRange(2,1,rows.length,headers.length).setValues(rows);
+        sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+        const rows = datos.map(r =>
+          headers.map(h => (r[h] === null || r[h] === undefined) ? '' : String(r[h]))
+        );
+        sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
       }
-      return resp({ok:true, guardados: datos ? datos.length : 0});
+      return out({ok: true, guardados: datos ? datos.length : 0});
     }
-    return resp({ok:false, msg:'Accion desconocida'});
-  } catch(err) { return resp({ok:false, msg:err.toString()}); }
+    return out({ok: false, msg: 'Accion desconocida: ' + accion});
+  } catch(err) {
+    return out({ok: false, msg: err.toString()});
+  }
 }
 
-function resp(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+// Respuesta — soporta JSONP (con callback) y JSON normal
+function out(obj, callback) {
+  const json = JSON.stringify(obj);
+  const text = callback ? callback + '(' + json + ')' : json;
+  const mime = callback
+    ? ContentService.MimeType.JAVASCRIPT
+    : ContentService.MimeType.JSON;
+  return ContentService.createTextOutput(text).setMimeType(mime);
 }`;
 
 function generarScript() {
