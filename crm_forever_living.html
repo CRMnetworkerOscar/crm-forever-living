@@ -808,44 +808,91 @@ tr:hover td { background: #FFFDF0; }
 <!-- ==================== SEGUIMIENTO ==================== -->
 <div id="seguimiento" class="section">
   <div class="page-header">
-    <div class="page-title"><div class="page-title-bar"></div>Seguimiento</div>
-    <button class="btn btn-gold" onclick="abrirModalSeguimiento()">+ Registrar compra</button>
+    <div class="page-title"><div class="page-title-bar"></div>Seguimiento de clientes</div>
+  </div>
+
+  <!-- Selector de cliente -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-body" style="padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap">Cliente:</span>
+      <select class="form-select" style="flex:1;max-width:340px" id="sel-cliente-seg" onchange="verSeguimiento()">
+        <option value="">— Selecciona un cliente —</option>
+      </select>
+      <div id="seg-cliente-info" style="font-size:11px;color:var(--text-muted)"></div>
+    </div>
   </div>
 
   <div class="two-col">
+    <!-- COLUMNA IZQUIERDA: línea de tiempo unificada -->
     <div>
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header"><span class="card-header-title">Seleccionar cliente</span></div>
-        <div class="card-body">
-          <select class="form-select" style="width:100%" id="sel-cliente-seg" onchange="verSeguimiento()">
-            <option value="">— Elige un cliente —</option>
-          </select>
-        </div>
-      </div>
-
       <div class="card">
-        <div class="card-header"><span class="card-header-title">Historial de compras</span></div>
+        <div class="card-header">
+          <span class="card-header-title">📋 Bitácora de seguimiento</span>
+          <div style="display:flex;gap:6px">
+            <span id="seg-total-items" style="font-size:11px;color:var(--text-muted);align-self:center"></span>
+          </div>
+        </div>
         <div class="timeline" id="timeline-cliente">
           <div class="tl-item">
             <div class="tl-dot"></div>
-            <div><div class="tl-text" style="color:var(--text-muted)">Selecciona un cliente para ver su historial</div></div>
+            <div><div class="tl-text" style="color:var(--text-muted)">Selecciona un cliente para ver su bitácora</div></div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- COLUMNA DERECHA: formularios -->
     <div>
-      <div class="detail-card" style="margin-bottom:16px">
-        <div class="detail-card-title">Estimación de agotamiento</div>
-        <div id="progress-productos">
-          <div style="color:var(--text-muted);font-size:12px">Selecciona un cliente para ver el progreso de sus productos</div>
+
+      <!-- Registrar interacción -->
+      <div class="detail-card" style="margin-bottom:14px;border-left:3px solid var(--blue)">
+        <div class="detail-card-title" style="color:var(--blue)">📞 Registrar contacto / interacción</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <div class="form-label">Tipo de contacto</div>
+            <select class="form-select" id="int-tipo">
+              <option value="llamada">📞 Llamada telefónica</option>
+              <option value="whatsapp">💬 WhatsApp / Mensaje</option>
+              <option value="visita">🤝 Visita personal</option>
+              <option value="entrega">📦 Entrega de producto</option>
+              <option value="nota">📝 Nota interna</option>
+              <option value="recordatorio">⏰ Recordatorio futuro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Fecha</div>
+            <input class="form-input" type="date" id="int-fecha">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Resultado / Estado</div>
+            <select class="form-select" id="int-resultado">
+              <option value="positivo">✅ Positivo — interesado</option>
+              <option value="pendiente">⏳ Pendiente — volver a contactar</option>
+              <option value="negativo">❌ No interesado por ahora</option>
+              <option value="compra">🛒 Resultó en compra</option>
+              <option value="info">ℹ️ Solo informativo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Recordatorio en (días)</div>
+            <input class="form-input" type="number" id="int-recordatorio" placeholder="Ej: 30" min="0">
+          </div>
+          <div class="form-group full">
+            <div class="form-label">Detalle de la interacción *</div>
+            <textarea class="form-textarea" id="int-nota" rows="3"
+              placeholder="Ej: Llamé para ofrecer pasta dental en el próximo pedido. Me dijo que no por ahora, volver a preguntar en 30 días cuando se le acabe la que tiene."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-gold" onclick="guardarInteraccion()">Guardar interacción</button>
         </div>
       </div>
 
-      <div class="detail-card">
-        <div class="detail-card-title">Agregar compra manualmente</div>
+      <!-- Registrar compra -->
+      <div class="detail-card" style="border-left:3px solid var(--green)">
+        <div class="detail-card-title" style="color:var(--green)">🛒 Registrar compra</div>
         <div class="form-group" style="margin-bottom:10px">
-          <div class="form-label">Producto comprado</div>
+          <div class="form-label">Producto comprado *</div>
           <input class="form-input" id="seg-producto" placeholder="Nombre del producto" list="lista-productos-seg">
           <datalist id="lista-productos-seg"></datalist>
         </div>
@@ -859,7 +906,7 @@ tr:hover td { background: #FFFDF0; }
             <input class="form-input" type="number" id="seg-precio" placeholder="$0.00">
           </div>
           <div class="form-group">
-            <div class="form-label">Lista de precio usada</div>
+            <div class="form-label">Lista de precio</div>
             <select class="form-select" id="seg-lista">
               <option>Público en general</option>
               <option>Cliente preferente</option>
@@ -873,13 +920,21 @@ tr:hover td { background: #FFFDF0; }
             <div class="form-label">Días estimados duración</div>
             <input class="form-input" type="number" id="seg-dias" placeholder="30" value="30">
           </div>
-        </div>
-        <div class="form-group" style="margin-top:10px">
-          <div class="form-label">Notas</div>
-          <textarea class="form-textarea" id="seg-notas" placeholder="Observaciones sobre la compra..." rows="2"></textarea>
+          <div class="form-group full">
+            <div class="form-label">Notas de la compra</div>
+            <textarea class="form-textarea" id="seg-notas" rows="2" placeholder="Observaciones..."></textarea>
+          </div>
         </div>
         <div class="form-actions">
-          <button class="btn btn-gold" onclick="guardarCompra()">Guardar compra</button>
+          <button class="btn btn-gold" onclick="guardarCompra()">Registrar compra</button>
+        </div>
+      </div>
+
+      <!-- Estimación agotamiento -->
+      <div class="detail-card" style="margin-top:14px">
+        <div class="detail-card-title">⏱ Estimación de agotamiento</div>
+        <div id="progress-productos">
+          <div style="color:var(--text-muted);font-size:12px">Selecciona un cliente para ver el progreso</div>
         </div>
       </div>
     </div>
@@ -1480,6 +1535,7 @@ let DB = {
   compras: [],
   citas: [],
   movimientos: [],
+  interacciones: [],
   inventario: {},  // cod -> stock
   config: {
     gsUrl: '', gsId: '', nombre: '', nivel: 'Asistente de Gerente',
@@ -1879,48 +1935,141 @@ function poblarSelectClientes() {
   poblarDatalistProductos('lista-productos-seg');
 }
 
+// ── Tipos de interacción ──
+const TIPOS_INT = {
+  llamada:      { icon:'📞', color:'var(--blue)',       label:'Llamada' },
+  whatsapp:     { icon:'💬', color:'#25D366',           label:'WhatsApp' },
+  visita:       { icon:'🤝', color:'var(--green)',      label:'Visita' },
+  entrega:      { icon:'📦', color:'var(--gold-dark)',  label:'Entrega' },
+  nota:         { icon:'📝', color:'var(--text-muted)', label:'Nota' },
+  recordatorio: { icon:'⏰', color:'var(--red)',        label:'Recordatorio' },
+};
+const RESULTADO_BADGE = {
+  positivo:  { text:'✅ Positivo',     bg:'var(--green-light)', color:'#3D7A25' },
+  pendiente: { text:'⏳ Pendiente',    bg:'var(--gold-light)',  color:'#7A5C00' },
+  negativo:  { text:'❌ No por ahora', bg:'var(--red-light)',   color:'var(--red)' },
+  compra:    { text:'🛒 Compra',       bg:'var(--green-light)', color:'#3D7A25' },
+  info:      { text:'ℹ️ Informativo',  bg:'var(--bg)',          color:'var(--text-muted)' },
+};
+
 function verSeguimiento() {
-  const id = document.getElementById('sel-cliente-seg').value;
-  const tl = document.getElementById('timeline-cliente');
-  const pp = document.getElementById('progress-productos');
+  const id   = document.getElementById('sel-cliente-seg').value;
+  const tl   = document.getElementById('timeline-cliente');
+  const pp   = document.getElementById('progress-productos');
+  const info = document.getElementById('seg-cliente-info');
+  const tot  = document.getElementById('seg-total-items');
   if (!id) {
     tl.innerHTML = '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text" style="color:var(--text-muted)">Selecciona un cliente</div></div></div>';
     pp.innerHTML = '<div style="color:var(--text-muted);font-size:12px">Selecciona un cliente</div>';
+    if (info) info.textContent = '';
     return;
   }
-  const compras = DB.compras.filter(c=>c.clienteId===id).sort((a,b)=>b.fecha>a.fecha?1:-1);
-  const colors = ['','green','blue'];
-  tl.innerHTML = compras.length ? compras.map((c,i) => `
-    <div class="tl-item">
-      <div class="tl-dot ${colors[i%3]}"></div>
-      <div>
-        <div class="tl-date">${formatFecha(c.fecha)}</div>
-        <div class="tl-text">${c.producto} · ${formatPrecio(c.precio)}</div>
-        <div class="tl-sub">${c.lista||''} ${c.notas?'· '+c.notas:''}</div>
-      </div>
-    </div>`).join('') :
-    '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text" style="color:var(--text-muted)">Sin compras registradas para este cliente</div></div></div>';
+  const cli = DB.clientes.find(c=>c.id===id);
+  if (info && cli) info.textContent = '📱 ' + (cli.telMovil||'—');
+  document.getElementById('int-fecha').value = hoy();
 
-  // Progress bars últimas compras
-  const recientes = compras.slice(0,4);
-  if (!recientes.length) {
-    pp.innerHTML = '<div style="color:var(--text-muted);font-size:12px">Sin compras registradas</div>';
-    return;
+  const compras = (DB.compras||[]).filter(c=>c.clienteId===id).map(c=>({...c,_tipo:'compra',_fecha:c.fecha||''}));
+  const ints    = (DB.interacciones||[]).filter(i=>i.clienteId===id).map(i=>({...i,_tipo:'interaccion',_fecha:i.fecha||''}));
+  const todos   = [...compras,...ints].sort((a,b)=>b._fecha>a._fecha?1:b._fecha<a._fecha?-1:0);
+
+  if (tot) tot.textContent = todos.length + ' registro' + (todos.length!==1?'s':'');
+
+  if (!todos.length) {
+    tl.innerHTML = '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text" style="color:var(--text-muted)">Sin registros aún. Usa los formularios de la derecha para empezar.</div></div></div>';
+  } else {
+    tl.innerHTML = todos.map(item => {
+      if (item._tipo === 'compra') {
+        return `<div class="tl-item">
+          <div class="tl-dot" style="background:var(--green);border-color:#4A8030"></div>
+          <div style="flex:1">
+            <div class="tl-date">${formatFecha(item.fecha)} <span class="badge b-green" style="font-size:9px">🛒 Compra</span></div>
+            <div class="tl-text" style="font-weight:600">${item.producto||''}</div>
+            <div class="tl-sub">${item.lista||''} ${item.precio?'· '+formatPrecio(item.precio):''}</div>
+            ${item.notas?`<div class="tl-sub" style="font-style:italic;margin-top:2px">"${item.notas}"</div>`:''}
+          </div>
+          <button onclick="eliminarRegistro('compra','${item.id}')" style="background:none;border:none;color:var(--text-hint);cursor:pointer;font-size:12px;padding:2px 6px" title="Eliminar">✕</button>
+        </div>`;
+      } else {
+        const t = TIPOS_INT[item.tipo]||TIPOS_INT['nota'];
+        const r = RESULTADO_BADGE[item.resultado]||RESULTADO_BADGE['info'];
+        let recLabel = '';
+        if (item.recordatorio && parseInt(item.recordatorio)>0) {
+          const rf = new Date(new Date(item.fecha+'T12:00:00').getTime()+parseInt(item.recordatorio)*86400000);
+          recLabel = `<div class="tl-sub" style="color:var(--red);margin-top:3px">⏰ Recordatorio: ${rf.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})}</div>`;
+        }
+        return `<div class="tl-item">
+          <div class="tl-dot" style="background:${t.color};border-color:${t.color}88"></div>
+          <div style="flex:1">
+            <div class="tl-date" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              ${formatFecha(item.fecha)}
+              <span class="badge" style="font-size:9px;background:#F0EDE4;color:var(--dark)">${t.icon} ${t.label}</span>
+              <span class="badge" style="font-size:9px;background:${r.bg};color:${r.color}">${r.text}</span>
+            </div>
+            <div class="tl-text" style="margin-top:4px;line-height:1.6">${item.nota||''}</div>
+            ${recLabel}
+          </div>
+          <button onclick="eliminarRegistro('interaccion','${item.id}')" style="background:none;border:none;color:var(--text-hint);cursor:pointer;font-size:12px;padding:2px 6px" title="Eliminar">✕</button>
+        </div>`;
+      }
+    }).join('');
   }
-  pp.innerHTML = recientes.map(c => {
-    const dias = diasRestantes(c.fecha, c.diasDuracion||30);
-    const pct = Math.max(0, Math.min(100, dias!==null ? Math.round((dias/(c.diasDuracion||30))*100) : 0));
-    const color = dias===null?'var(--text-hint)':dias<=5?'var(--red)':dias<=15?'var(--gold)':'var(--green)';
+
+  // Progress bars
+  const cr = compras.sort((a,b)=>b.fecha>a.fecha?1:-1).slice(0,4);
+  if (!cr.length) { pp.innerHTML='<div style="color:var(--text-muted);font-size:12px">Sin compras registradas</div>'; return; }
+  pp.innerHTML = cr.map(c=>{
+    const dias=diasRestantes(c.fecha,c.diasDuracion||30);
+    const pct=Math.max(0,Math.min(100,dias!==null?Math.round((dias/(c.diasDuracion||30))*100):0));
+    const col=dias===null?'var(--text-hint)':dias<=5?'var(--red)':dias<=15?'var(--gold)':'var(--green)';
     return `<div class="progress-wrap">
-      <div class="progress-header">
-        <span class="progress-label">${c.producto}</span>
-        <span class="progress-val" style="color:${color}">${textoDias(dias)}</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="progress-header"><span class="progress-label" style="font-size:11px">${c.producto}</span><span class="progress-val" style="color:${col}">${textoDias(dias)}</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${col}"></div></div>
     </div>`;
   }).join('');
 }
 
+function guardarInteraccion() {
+  const id = document.getElementById('sel-cliente-seg').value;
+  if (!id) { toast('Selecciona un cliente primero', 'error'); return; }
+  const nota = document.getElementById('int-nota').value.trim();
+  if (!nota) { toast('Escribe el detalle de la interacción', 'error'); return; }
+  const interaccion = {
+    id: uid(), clienteId: id,
+    tipo:        document.getElementById('int-tipo').value,
+    resultado:   document.getElementById('int-resultado').value,
+    fecha:       document.getElementById('int-fecha').value || hoy(),
+    nota,
+    recordatorio:document.getElementById('int-recordatorio').value || 0,
+    creado:      new Date().toISOString()
+  };
+  if (!DB.interacciones) DB.interacciones = [];
+  DB.interacciones.push(interaccion);
+
+  // Crear recordatorio en calendario si aplica
+  if (parseInt(interaccion.recordatorio) > 0) {
+    const cli = DB.clientes.find(c=>c.id===id);
+    const rf  = new Date(new Date(interaccion.fecha+'T12:00:00').getTime()+parseInt(interaccion.recordatorio)*86400000);
+    const rfStr = rf.toISOString().slice(0,10);
+    DB.citas.push({ id:uid(), titulo:'Recordatorio: '+(cli?cli.nombre:'Cliente'), tipo:'Llamada de seguimiento', persona:cli?cli.nombre:'', fecha:rfStr, hora:'', notas:nota.slice(0,120), creado:new Date().toISOString() });
+    syncGS('Citas', DB.citas);
+    toast('✓ Guardado · Recordatorio agendado para ' + formatFecha(rfStr));
+  } else {
+    toast('Interacción guardada ✓');
+  }
+  guardarDB();
+  verSeguimiento();
+  actualizarDashboard();
+  document.getElementById('int-nota').value = '';
+  document.getElementById('int-recordatorio').value = '';
+  syncGS('Interacciones', DB.interacciones);
+}
+
+function eliminarRegistro(tipo, id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  if (tipo==='compra')       { DB.compras       = DB.compras.filter(c=>c.id!==id);       syncGS('Compras', DB.compras); }
+  else                       { DB.interacciones = DB.interacciones.filter(i=>i.id!==id); syncGS('Interacciones', DB.interacciones); }
+  guardarDB(); verSeguimiento(); toast('Registro eliminado');
+}
 function guardarCompra() {
   const id = document.getElementById('sel-cliente-seg').value;
   if (!id) { toast('Selecciona un cliente', 'error'); return; }
@@ -2292,7 +2441,8 @@ async function syncTodo() {
     await syncGS('Clientes',   DB.clientes);
     await syncGS('Prospectos', DB.prospectos);
     await syncGS('Compras',    DB.compras);
-    await syncGS('Citas',      DB.citas);
+    await syncGS('Citas',         DB.citas);
+    await syncGS('Interacciones', DB.interacciones||[]);
     const invArr = Object.entries(DB.inventario).map(([cod,stock]) => ({cod, stock}));
     await syncGS('Inventario', invArr);
     setGsStatus('ok');
@@ -2308,7 +2458,7 @@ async function cargarDesdeGS() {
   if (!DB.config.gsUrl) return false;
   setGsStatus('syncing');
   try {
-    const tablas = ['Clientes','Prospectos','Compras','Citas','Inventario'];
+    const tablas = ['Clientes','Prospectos','Compras','Citas','Interacciones','Inventario'];
     let hayDatos = false;
     for (const tabla of tablas) {
       let j;
@@ -2329,7 +2479,8 @@ async function cargarDesdeGS() {
       if (tabla === 'Clientes')   DB.clientes   = objetos;
       if (tabla === 'Prospectos') DB.prospectos = objetos;
       if (tabla === 'Compras')    DB.compras    = objetos;
-      if (tabla === 'Citas')      DB.citas      = objetos;
+      if (tabla === 'Citas')         DB.citas         = objetos;
+      if (tabla === 'Interacciones')  DB.interacciones = objetos;
       if (tabla === 'Inventario') {
         DB.inventario = {};
         objetos.forEach(o => {
