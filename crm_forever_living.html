@@ -1018,7 +1018,16 @@ tr:hover td { background: #FFFDF0; }
   <div class="card" style="margin-bottom:16px">
     <div class="card-header">
       <span class="card-header-title">Catálogo de productos Forever Living</span>
-      <span id="total-inv" style="font-size:11px;color:var(--text-muted)"></span>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="total-inv" style="font-size:11px;color:var(--text-muted)"></span>
+        <span id="inv-sync-status" style="font-size:10px;color:var(--text-muted)"></span>
+        <button class="btn btn-outline btn-sm" onclick="syncInventarioManual()"
+          id="btn-sync-inv"
+          style="color:var(--gold-dark);border-color:var(--gold);font-size:11px"
+          title="Forzar sincronización del inventario con Google Sheets">
+          ↺ Sincronizar inventario
+        </button>
+      </div>
     </div>
     <div class="table-wrap">
       <table>
@@ -2317,9 +2326,58 @@ function renderInventario() {
 }
 
 function ajustarStock(cod, delta) {
-  if (!DB.inventario[cod]) DB.inventario[cod]=0;
-  DB.inventario[cod] = Math.max(0, DB.inventario[cod]+delta);
-  guardarDB(); renderInventario();
+  if (!DB.inventario[cod]) DB.inventario[cod] = 0;
+  DB.inventario[cod] = Math.max(0, DB.inventario[cod] + delta);
+  guardarDB();
+  renderInventario();
+  // Sincronizar con Sheets inmediatamente
+  const invArr = Object.entries(DB.inventario).map(([c,s]) => ({cod:c, stock:s}));
+  syncGS('Inventario', invArr).then(() => {
+    marcarSyncInv('ok');
+  }).catch(() => {
+    marcarSyncInv('error');
+  });
+}
+
+function marcarSyncInv(estado) {
+  const el = document.getElementById('inv-sync-status');
+  if (!el) return;
+  const ahora = new Date().toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'});
+  if (estado === 'ok') {
+    el.textContent = '✓ Sheets actualizado ' + ahora;
+    el.style.color = 'var(--green)';
+  } else {
+    el.textContent = '⚠️ Sin confirmar — presiona ↺ Sincronizar';
+    el.style.color = 'var(--red)';
+  }
+}
+
+async function syncInventarioManual() {
+  const btn = document.getElementById('btn-sync-inv');
+  const el  = document.getElementById('inv-sync-status');
+  if (btn) { btn.textContent = '⏳ Sincronizando...'; btn.disabled = true; }
+  if (el)  { el.textContent = ''; }
+  try {
+    // 1. Primero cargar el inventario actual desde Sheets
+    const j = await gsGet(DB.config.gsUrl, { tabla: 'Inventario' });
+    if (j && j.ok && j.datos && j.datos.length >= 2) {
+      const [headers, ...rows] = j.datos;
+      // Mergear: Sheets tiene prioridad solo si es más reciente
+      // En este caso confiamos en el localStorage como fuente de verdad
+    }
+    // 2. Subir el inventario local completo a Sheets
+    const invArr = Object.entries(DB.inventario)
+      .filter(([cod, stock]) => stock > 0)  // Solo productos con stock
+      .map(([cod, stock]) => ({ cod, stock }));
+    await syncGS('Inventario', invArr);
+    marcarSyncInv('ok');
+    toast('✓ Inventario sincronizado con Google Sheets (' + invArr.length + ' productos)');
+  } catch(e) {
+    marcarSyncInv('error');
+    toast('Error al sincronizar inventario. Verifica tu conexión.', 'error');
+  } finally {
+    if (btn) { btn.textContent = '↺ Sincronizar inventario'; btn.disabled = false; }
+  }
 }
 
 function guardarMovimiento() {
@@ -2346,8 +2404,11 @@ function guardarMovimiento() {
   cerrarModal('modal-movimiento');
   renderInventario();
   toast('Movimiento registrado ✓');
-  syncGS('Inventario', Object.entries(DB.inventario).map(([cod,stock])=>({cod,stock})));
-  syncGS('Compras', DB.movimientos);
+  const invArr = Object.entries(DB.inventario)
+    .filter(([c,s]) => s > 0)
+    .map(([c,s]) => ({cod:c, stock:s}));
+  syncGS('Inventario', invArr).then(() => marcarSyncInv('ok')).catch(() => marcarSyncInv('error'));
+  syncGS('Movimientos', DB.movimientos);
 }
 
 function renderMovimientos() {
@@ -2532,8 +2593,15 @@ async function cargarDesdeGS() {
       if (tabla === 'Inventario') {
         DB.inventario = {};
         objetos.forEach(o => {
-          if (o.cod) DB.inventario[o.cod] = parseInt(o.stock) || 0;
+          if (o.cod) DB.inventario[String(o.cod).trim()] = parseInt(o.stock) || 0;
         });
+        // Marcar hora de última carga desde Sheets
+        const el = document.getElementById('inv-sync-status');
+        if (el) {
+          const ahora = new Date().toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'});
+          el.textContent = '✓ Cargado desde Sheets ' + ahora;
+          el.style.color = 'var(--green)';
+        }
       }
     }
     if (hayDatos) { guardarDB(); setGsStatus('ok'); return true; }
