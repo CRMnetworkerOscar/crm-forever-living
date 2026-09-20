@@ -727,6 +727,7 @@ tr:hover td { background: #FFFDF0; }
             <th>Último producto</th>
             <th>Última compra</th>
             <th>Próx. recompra</th>
+            <th title="Interacciones registradas">Seguim.</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -867,10 +868,13 @@ tr:hover td { background: #FFFDF0; }
             <div class="form-label">Resultado / Estado</div>
             <select class="form-select" id="int-resultado">
               <option value="positivo">✅ Positivo — interesado</option>
+              <option value="esperando">👀 Esperando respuesta — me dejó en visto</option>
               <option value="pendiente">⏳ Pendiente — volver a contactar</option>
               <option value="negativo">❌ No interesado por ahora</option>
               <option value="compra">🛒 Resultó en compra</option>
               <option value="info">ℹ️ Solo informativo</option>
+              <option value="nocontesta">📵 No contestó</option>
+              <option value="ocupado">🔄 Ocupado — llamar después</option>
             </select>
           </div>
           <div class="form-group">
@@ -1806,26 +1810,55 @@ function guardarCliente() {
 }
 
 function renderClientes() {
-  const buscar = (document.getElementById('buscar-cliente')?.value||'').toLowerCase();
-  let lista = DB.clientes.filter(c =>
-    c.nombre.toLowerCase().includes(buscar) ||
-    (c.telMovil||'').includes(buscar) ||
-    (c.producto||'').toLowerCase().includes(buscar)
-  );
+  const buscar = (document.getElementById('buscar-cliente')?.value||'').toLowerCase().trim();
+  let lista = DB.clientes.filter(c => {
+    if (!buscar) return true;
+    const nombre  = String(c.nombre||'').toLowerCase();
+    const tel     = String(c.telMovil||'').replace(/\s/g,'').toLowerCase();
+    const tel2    = String(c.telCasa||'').replace(/\s/g,'').toLowerCase();
+    const tel3    = String(c.telTrabajo||'').replace(/\s/g,'').toLowerCase();
+    const prod    = String(c.producto||'').toLowerCase();
+    const email   = String(c.email||'').toLowerCase();
+    const buscarS = buscar.replace(/\s/g,'');
+    return nombre.includes(buscar) || tel.includes(buscarS) ||
+           tel2.includes(buscarS)  || tel3.includes(buscarS) ||
+           prod.includes(buscar)   || email.includes(buscar);
+  });
   document.getElementById('total-clientes').textContent = lista.length + ' cliente' + (lista.length!==1?'s':'');
   const tbody = document.getElementById('tabla-clientes');
   if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-hint);padding:24px">Sin clientes. Agrega el primero con el botón amarillo.</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-hint);padding:24px">${buscar ? 'Sin resultados para "'+buscar+'" — prueba con otro término' : 'Sin clientes. Agrega el primero con el botón amarillo.'}</td></tr>`;
     return;
   }
   tbody.innerHTML = lista.map(c => {
     const dias = diasRestantes(c.fechaCompra, c.diasDuracion);
+    // Indicador de seguimiento
+    const ints = (DB.interacciones||[]).filter(i=>i.clienteId===c.id);
+    const compras = (DB.compras||[]).filter(i=>i.clienteId===c.id);
+    const totalSeg = ints.length + compras.length;
+    const ultimaInt = ints.sort((a,b)=>b.fecha>a.fecha?1:-1)[0];
+    const TIPOS_ICON = {llamada:'📞',whatsapp:'💬',visita:'🤝',entrega:'📦',nota:'📝',recordatorio:'⏰'};
+    const segBadge = totalSeg > 0
+      ? `<span title="${totalSeg} registro(s) de seguimiento${ultimaInt?' · Último: '+formatFecha(ultimaInt.fecha):''}"
+           style="display:inline-flex;align-items:center;gap:3px;background:var(--blue-light);color:#1A6E9A;
+           font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px;cursor:pointer"
+           onclick="irASeguimiento('${c.id}')">
+           ${ultimaInt?TIPOS_ICON[ultimaInt.tipo]||'📋':'📋'} ${totalSeg}
+         </span>`
+      : `<span style="font-size:10px;color:var(--text-hint)">—</span>`;
+    // WhatsApp link
+    const waNum = String(c.telMovil||'').replace(/\D/g,'');
+    const waLink = waNum
+      ? `<a href="https://wa.me/52${waNum}" target="_blank"
+           style="color:#25D366;margin-left:6px;font-size:13px;text-decoration:none" title="Abrir WhatsApp">💬</a>`
+      : '';
     return `<tr>
       <td><span class="avatar ${avatarColor(c.nombre)}" style="margin-right:8px">${initiales(c.nombre)}</span>${c.nombre}</td>
-      <td>${c.telMovil||'—'}</td>
+      <td>${c.telMovil||'—'}${waLink}</td>
       <td>${c.producto||'—'}</td>
       <td>${formatFecha(c.fechaCompra)}</td>
       <td><span class="badge ${coloresBadge(dias)}">${textoDias(dias)}</span></td>
+      <td>${segBadge}</td>
       <td><span class="badge ${dias!==null&&dias<=DB.config.diasAlerta?'b-red':'b-green'}">${dias!==null&&dias<=DB.config.diasAlerta?'Recompra':'Al día'}</span></td>
       <td style="white-space:nowrap">
         <button class="btn btn-outline btn-sm" onclick="verCliente('${c.id}')">Ver</button>
@@ -1836,11 +1869,26 @@ function renderClientes() {
   }).join('');
 }
 
+// Ir directo a Seguimiento con ese cliente seleccionado
+function irASeguimiento(clienteId) {
+  showSection('seguimiento', document.querySelector('.nav-item:nth-child(4)') || document.querySelectorAll('.nav-item')[3]);
+  setTimeout(() => {
+    const sel = document.getElementById('sel-cliente-seg');
+    if (sel) { sel.value = clienteId; verSeguimiento(); }
+  }, 100);
+}
+
 function verCliente(id) {
   const c = DB.clientes.find(x=>x.id===id);
   if (!c) return;
   document.getElementById('dc-nombre').textContent = c.nombre;
-  document.getElementById('dc-tel-movil').textContent = c.telMovil||'—';
+  const waNumDC = String(c.telMovil||'').replace(/\D/g,'');
+  const waHref  = waNumDC ? `https://wa.me/52${waNumDC}` : null;
+  const dcTelEl = document.getElementById('dc-tel-movil');
+  dcTelEl.innerHTML = (c.telMovil||'—') + (waHref
+    ? ` <a href="${waHref}" target="_blank"
+         style="color:#25D366;margin-left:8px;font-size:13px;font-weight:600;text-decoration:none"
+         title="Abrir WhatsApp">💬 WhatsApp</a>` : '');
   document.getElementById('dc-tel-casa').textContent = c.telCasa||'—';
   document.getElementById('dc-tel-trabajo').textContent = c.telTrabajo||'—';
   document.getElementById('dc-email').textContent = c.email||'—';
@@ -2002,11 +2050,14 @@ const TIPOS_INT = {
   recordatorio: { icon:'⏰', color:'var(--red)',        label:'Recordatorio' },
 };
 const RESULTADO_BADGE = {
-  positivo:  { text:'✅ Positivo',     bg:'var(--green-light)', color:'#3D7A25' },
-  pendiente: { text:'⏳ Pendiente',    bg:'var(--gold-light)',  color:'#7A5C00' },
-  negativo:  { text:'❌ No por ahora', bg:'var(--red-light)',   color:'var(--red)' },
-  compra:    { text:'🛒 Compra',       bg:'var(--green-light)', color:'#3D7A25' },
-  info:      { text:'ℹ️ Informativo',  bg:'var(--bg)',          color:'var(--text-muted)' },
+  positivo:   { text:'✅ Positivo',          bg:'var(--green-light)',           color:'#3D7A25' },
+  esperando:  { text:'👀 En visto',          bg:'#FFF0E0',                      color:'#8A4A00' },
+  pendiente:  { text:'⏳ Pendiente',         bg:'var(--gold-light)',             color:'#7A5C00' },
+  negativo:   { text:'❌ No por ahora',      bg:'var(--red-light)',              color:'var(--red)' },
+  compra:     { text:'🛒 Compra',            bg:'var(--green-light)',            color:'#3D7A25' },
+  info:       { text:'ℹ️ Informativo',       bg:'var(--bg)',                     color:'var(--text-muted)' },
+  nocontesta: { text:'📵 No contestó',       bg:'#F0EDE4',                      color:'#555' },
+  ocupado:    { text:'🔄 Llamar después',    bg:'var(--blue-light)',             color:'#1A6E9A' },
 };
 
 function verSeguimiento() {
@@ -2022,7 +2073,14 @@ function verSeguimiento() {
     return;
   }
   const cli = DB.clientes.find(c=>c.id===id);
-  if (info && cli) info.textContent = '📱 ' + (cli.telMovil||'—');
+  if (info && cli) {
+    const waNumSeg = String(cli.telMovil||'').replace(/\D/g,'');
+    info.innerHTML = cli.telMovil
+      ? `📱 ${cli.telMovil} <a href="https://wa.me/52${waNumSeg}" target="_blank"
+           style="color:#25D366;font-weight:600;text-decoration:none;margin-left:6px"
+           title="Abrir WhatsApp">💬 WhatsApp</a>`
+      : '—';
+  }
   document.getElementById('int-fecha').value = hoy();
 
   const compras = (DB.compras||[]).filter(c=>c.clienteId===id).map(c=>({...c,_tipo:'compra',_fecha:c.fecha||''}));
@@ -2051,8 +2109,13 @@ function verSeguimiento() {
         const r = RESULTADO_BADGE[item.resultado]||RESULTADO_BADGE['info'];
         let recLabel = '';
         if (item.recordatorio && parseInt(item.recordatorio)>0) {
-          const rf = new Date(new Date(item.fecha+'T12:00:00').getTime()+parseInt(item.recordatorio)*86400000);
-          recLabel = `<div class="tl-sub" style="color:var(--red);margin-top:3px">⏰ Recordatorio: ${rf.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})}</div>`;
+          const fechaNorm = normalizarFecha(item.fecha);
+          if (fechaNorm) {
+            const rf = new Date(new Date(fechaNorm+'T12:00:00').getTime()+parseInt(item.recordatorio)*86400000);
+            if (!isNaN(rf.getTime())) {
+              recLabel = `<div class="tl-sub" style="color:var(--red);margin-top:3px">⏰ Recordatorio: ${rf.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})}</div>`;
+            }
+          }
         }
         return `<div class="tl-item">
           <div class="tl-dot" style="background:${t.color};border-color:${t.color}88"></div>
