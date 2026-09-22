@@ -1690,7 +1690,11 @@ function normalizarFecha(f) {
   // Ya es YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(f)) return f;
 
-  // Formato M/D/YYYY o MM/DD/YYYY (Google Sheets lo exporta así)
+  // Formato ISO completo: 2026-10-14T07:00:00.000Z (lo que guarda Google Sheets)
+  const iso = f.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+
+  // Formato M/D/YYYY o MM/DD/YYYY (Google Sheets también lo exporta así)
   const slash = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (slash) {
     const [, m, d, y] = slash;
@@ -1704,21 +1708,24 @@ function normalizarFecha(f) {
     return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
   }
 
-  // Formato con guiones D-M-YYYY o M-D-YYYY
+  // Formato con guiones D-M-YYYY
   const dash = f.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
   if (dash) {
     const [, a, b, y] = dash;
     return `${y}-${a.padStart(2,'0')}-${b.padStart(2,'0')}`;
   }
 
-  // Intento genérico — Google Sheets a veces manda "Thu Jul 15 2025 00:00:00..."
-  const generico = new Date(f);
-  if (!isNaN(generico.getTime())) {
-    const y = generico.getFullYear();
-    const m = String(generico.getMonth()+1).padStart(2,'0');
-    const d = String(generico.getDate()).padStart(2,'0');
-    return `${y}-${m}-${d}`;
-  }
+  // Intento genérico — para cualquier otro formato que JavaScript pueda parsear
+  try {
+    const generico = new Date(f);
+    if (!isNaN(generico.getTime())) {
+      // Usar UTC para evitar desfase de zona horaria
+      const y = generico.getUTCFullYear();
+      const m = String(generico.getUTCMonth()+1).padStart(2,'0');
+      const d = String(generico.getUTCDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+  } catch(e) {}
 
   return null;
 }
