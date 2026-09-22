@@ -2608,15 +2608,24 @@ async function syncGS(tabla, datos) {
 // ── Sincronizar TODAS las tablas ──
 async function syncTodo() {
   if (!DB.config.gsUrl) return;
+  // Protección: no sincronizar si no hay datos locales — evita borrar Sheets
+  const totalLocal = (DB.clientes||[]).length + (DB.prospectos||[]).length +
+                     (DB.citas||[]).length + (DB.compras||[]).length;
+  if (totalLocal === 0) {
+    console.warn('syncTodo: sin datos locales, omitiendo para no borrar Sheets');
+    return;
+  }
   setGsStatus('syncing');
   try {
-    await syncGS('Clientes',   DB.clientes);
-    await syncGS('Prospectos', DB.prospectos);
-    await syncGS('Compras',    DB.compras);
-    await syncGS('Citas',         DB.citas);
-    await syncGS('Interacciones', DB.interacciones||[]);
-    const invArr = Object.entries(DB.inventario).map(([cod,stock]) => ({cod, stock}));
-    await syncGS('Inventario', invArr);
+    if ((DB.clientes||[]).length)       await syncGS('Clientes',      DB.clientes);
+    if ((DB.prospectos||[]).length)     await syncGS('Prospectos',    DB.prospectos);
+    if ((DB.compras||[]).length)        await syncGS('Compras',       DB.compras);
+    if ((DB.citas||[]).length)          await syncGS('Citas',         DB.citas);
+    if ((DB.interacciones||[]).length)  await syncGS('Interacciones', DB.interacciones);
+    const invArr = Object.entries(DB.inventario||{})
+      .filter(([,s]) => s > 0)
+      .map(([c,s]) => ({cod:c, stock:s}));
+    if (invArr.length) await syncGS('Inventario', invArr);
     setGsStatus('ok');
     toast('✓ Datos sincronizados con Google Sheets');
   } catch(e) {
@@ -2667,8 +2676,13 @@ async function cargarDesdeGS() {
         }
       }
     }
-    if (hayDatos) { guardarDB(); setGsStatus('ok'); return true; }
-    setGsStatus('ok'); return false;
+    if (hayDatos) {
+      guardarDB();  // Persiste los datos de Sheets en localStorage
+      setGsStatus('ok');
+      return true;
+    }
+    setGsStatus('ok');
+    return false;
   } catch(e) {
     console.warn('cargarDesdeGS error:', e);
     setGsStatus('error');
@@ -2889,14 +2903,20 @@ document.addEventListener('DOMContentLoaded', () => {
   syncBtn.textContent = '↺ Sincronizar';
   syncBtn.title = 'Forzar sincronización con Google Sheets';
   syncBtn.onclick = async () => {
-    syncBtn.textContent = '⏳ Sincronizando...';
+    syncBtn.textContent = '⏳ Cargando desde Sheets...';
     syncBtn.disabled = true;
+    // PRIMERO: cargar desde Sheets (fuente de verdad)
     const ok = await cargarDesdeGS();
     if (ok) {
-      renderClientes(); renderProspectos(); actualizarDashboard(); renderCalendario();
+      // Los datos de Sheets ya están en DB, renderizar todo
+      renderClientes(); renderProspectos(); actualizarDashboard();
+      renderCalendario(); renderInventario();
       toast('✓ Datos actualizados desde Google Sheets');
+    } else {
+      // Si Sheets está vacío, entonces sí subir los locales
+      await syncTodo();
+      toast('✓ Datos locales enviados a Google Sheets');
     }
-    await syncTodo();
     syncBtn.textContent = '↺ Sincronizar';
     syncBtn.disabled = false;
   };
