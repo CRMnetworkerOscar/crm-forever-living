@@ -2258,13 +2258,18 @@ function renderCalendario() {
   const hoyD = new Date(); const hoyNum = hoyD.getDate();
   const esEsteMes = hoyD.getMonth()===calMes && hoyD.getFullYear()===calAnio;
 
-  // Eventos del mes
+  // Eventos del mes — normalizar fecha antes de comparar
   const eventosDelMes = DB.citas.filter(ev => {
     if (!ev.fecha) return false;
-    const d = new Date(ev.fecha+'T12:00:00');
-    return d.getMonth()===calMes && d.getFullYear()===calAnio;
+    const norm = normalizarFecha(ev.fecha);
+    if (!norm) return false;
+    const d = new Date(norm + 'T12:00:00');
+    return !isNaN(d.getTime()) && d.getMonth()===calMes && d.getFullYear()===calAnio;
   });
-  const diasConEvento = new Set(eventosDelMes.map(ev=>new Date(ev.fecha+'T12:00:00').getDate()));
+  const diasConEvento = new Set(eventosDelMes.map(ev => {
+    const norm = normalizarFecha(ev.fecha);
+    return norm ? new Date(norm + 'T12:00:00').getDate() : null;
+  }).filter(d => d !== null));
 
   // Mantener solo los encabezados
   const heads = grid.querySelectorAll('.cal-head');
@@ -2293,8 +2298,10 @@ function mostrarEventosDia(dia) {
   document.getElementById('cal-dia-label').textContent = `${dia} de ${meses[calMes]} ${calAnio}`;
   const eventos = DB.citas.filter(ev => {
     if (!ev.fecha) return false;
-    const d = new Date(ev.fecha+'T12:00:00');
-    return d.getDate()===dia && d.getMonth()===calMes && d.getFullYear()===calAnio;
+    const norm = normalizarFecha(ev.fecha);
+    if (!norm) return false;
+    const d = new Date(norm + 'T12:00:00');
+    return !isNaN(d.getTime()) && d.getDate()===dia && d.getMonth()===calMes && d.getFullYear()===calAnio;
   });
   const cont = document.getElementById('lista-eventos');
   if (!eventos.length) {
@@ -2519,8 +2526,10 @@ function actualizarDashboard() {
   const hoyD = new Date(); const fin = new Date(hoyD.getTime()+7*86400000);
   const citasSem = DB.citas.filter(ev=>{
     if (!ev.fecha) return false;
-    const d = new Date(ev.fecha+'T12:00:00');
-    return d>=hoyD && d<=fin;
+    const norm = normalizarFecha(ev.fecha);
+    if (!norm) return false;
+    const d = new Date(norm + 'T12:00:00');
+    return !isNaN(d.getTime()) && d>=hoyD && d<=fin;
   });
   document.getElementById('m-citas').textContent = citasSem.length;
 
@@ -2551,7 +2560,7 @@ function actualizarDashboard() {
         <div class="alert-icon">📅</div>
         <div>
           <div class="alert-title">${ev.titulo}</div>
-          <div class="alert-sub">${formatFecha(ev.fecha)} ${ev.hora||''} ${ev.persona?'· '+ev.persona:''}</div>
+          <div class="alert-sub">${formatFecha(normalizarFecha(ev.fecha)||ev.fecha)} ${ev.hora||''} ${ev.persona?'· '+ev.persona:''}</div>
         </div>
       </div>`).join('');
   }
