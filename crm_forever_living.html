@@ -796,6 +796,7 @@ tr:hover td { background: #FFFDF0; }
             <th>Fecha cita</th>
             <th>Etapa</th>
             <th>Acciones</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="tabla-prospectos">
@@ -1987,28 +1988,103 @@ function renderProspectos() {
   let lista = DB.prospectos;
   if (filtroEtapa) lista = lista.filter(p=>p.etapa===filtroEtapa);
   const tbody = document.getElementById('tabla-prospectos');
-  // Conteos
+  // Conteos por etapa
   ['Nuevo','Contactado','Cita','Cliente'].forEach(etapa => {
     const el = document.getElementById('cnt-'+etapa.toLowerCase());
     if (el) el.textContent = DB.prospectos.filter(p=>p.etapa===etapa).length;
   });
   if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-hint);padding:24px">Sin prospectos' + (filtroEtapa?' en esta etapa.':'. Agrega el primero.') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-hint);padding:24px">Sin prospectos' + (filtroEtapa?' en esta etapa.':'. Agrega el primero.') + '</td></tr>';
     return;
   }
   const etapaClass = { 'Nuevo':'b-blue','Contactado':'b-gold','Cita':'b-gold','Cliente':'b-green' };
-  tbody.innerHTML = lista.map(p => `<tr>
-    <td><span class="avatar ${avatarColor(p.nombre)}" style="margin-right:8px">${initiales(p.nombre)}</span>${p.nombre}</td>
-    <td>${p.telefono||'—'}</td>
-    <td>${p.interes||'—'}</td>
-    <td>${p.tipoCita||'—'}</td>
-    <td>${p.fechaCita ? formatFecha(p.fechaCita) + (p.horaCita?' '+p.horaCita:'') : '—'}</td>
-    <td><span class="badge ${etapaClass[p.etapa]||'b-gray'}">${p.etapa}</span></td>
-    <td style="white-space:nowrap">
-      <button class="btn btn-outline btn-sm" onclick="editarProspecto('${p.id}')">Editar</button>
-      <button class="btn btn-danger btn-sm" onclick="eliminarProspecto('${p.id}')">✕</button>
-    </td>
-  </tr>`).join('');
+  tbody.innerHTML = lista.map(p => {
+    // WhatsApp link
+    const waNum = String(p.telefono||'').replace(/\D/g,'');
+    const waLink = waNum
+      ? `<a href="https://wa.me/52${waNum}" target="_blank"
+           style="color:#25D366;margin-left:6px;font-size:13px;text-decoration:none"
+           title="Abrir WhatsApp">💬</a>`
+      : '';
+    // Seguimiento badge
+    const ints = (DB.interacciones||[]).filter(i=>i.clienteId===p.id);
+    const segBadge = ints.length > 0
+      ? `<span style="background:var(--blue-light);color:#1A6E9A;font-size:9px;font-weight:600;
+           padding:2px 6px;border-radius:20px;margin-left:6px;cursor:pointer"
+           onclick="irASeguimientoProspecto('${p.id}')" title="${ints.length} interacción(es)">
+           📋 ${ints.length}</span>`
+      : '';
+    // Botón convertir solo si no es ya Cliente
+    const btnConvertir = p.etapa !== 'Cliente'
+      ? `<button class="btn btn-outline btn-sm" style="color:var(--green);border-color:var(--green)"
+           onclick="convertirACliente('${p.id}')" title="Convertir a cliente">⭐ Cliente</button>`
+      : `<span class="badge b-green">✓ Convertido</span>`;
+    return `<tr>
+      <td><span class="avatar ${avatarColor(p.nombre)}" style="margin-right:8px">${initiales(p.nombre)}</span>
+          ${p.nombre}${segBadge}</td>
+      <td>${p.telefono||'—'}${waLink}</td>
+      <td>${p.interes||'—'}</td>
+      <td>${p.tipoCita||'—'}</td>
+      <td>${p.fechaCita ? formatFecha(normalizarFecha(p.fechaCita)||p.fechaCita) + (p.horaCita?' '+p.horaCita:'') : '—'}</td>
+      <td><span class="badge ${etapaClass[p.etapa]||'b-gray'}">${p.etapa}</span></td>
+      <td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+        ${btnConvertir}
+        <button class="btn btn-outline btn-sm" onclick="editarProspecto('${p.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminarProspecto('${p.id}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Ir a Seguimiento con prospecto seleccionado ──
+function irASeguimientoProspecto(id) {
+  showSection('seguimiento', document.querySelectorAll('.nav-item')[3]);
+  setTimeout(() => {
+    const sel = document.getElementById('sel-cliente-seg');
+    if (sel) { sel.value = id; verSeguimiento(); }
+  }, 100);
+}
+
+// ── Convertir prospecto a cliente ──
+function convertirACliente(id) {
+  const p = DB.prospectos.find(x=>x.id===id);
+  if (!p) return;
+  if (!confirm(`¿Convertir a ${p.nombre} en cliente?\n\nSe creará su ficha en Clientes. El prospecto se marcará como Convertido.`)) return;
+
+  // Crear cliente con los datos del prospecto
+  const nuevoCliente = {
+    id: uid(),
+    nombre: p.nombre,
+    telMovil: p.telefono||'',
+    telCasa: '', telTrabajo: '',
+    email: p.email||'',
+    direccion: '',
+    producto: p.interes||'',
+    lista: 'Público en general',
+    fechaCompra: hoy(),
+    diasDuracion: 30,
+    fechaEntrega: '', horaEntrega: '',
+    notas: `Convertido desde prospecto. Interés original: ${p.interes||''}. ${p.notas||''}`.trim(),
+    creado: new Date().toISOString()
+  };
+  DB.clientes.push(nuevoCliente);
+
+  // Marcar prospecto como convertido
+  const idx = DB.prospectos.findIndex(x=>x.id===id);
+  if (idx > -1) DB.prospectos[idx].etapa = 'Cliente';
+
+  guardarDB();
+  renderProspectos();
+  actualizarDashboard();
+  syncGS('Clientes', DB.clientes);
+  syncGS('Prospectos', DB.prospectos);
+  toast(`✓ ${p.nombre} convertido a cliente — completa su ficha en Clientes`);
+
+  // Ir a editar el cliente recién creado
+  setTimeout(() => {
+    showSection('clientes', document.querySelectorAll('.nav-item')[1]);
+    setTimeout(() => editarCliente(nuevoCliente.id), 200);
+  }, 1000);
 }
 
 function filtrarEtapa(etapa) { filtroEtapa = etapa; renderProspectos(); }
@@ -2041,9 +2117,14 @@ function eliminarProspecto(id) {
 // ================================================================
 function poblarSelectClientes() {
   const sel = document.getElementById('sel-cliente-seg');
-  sel.innerHTML = '<option value="">— Elige un cliente —</option>' +
-    DB.clientes.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
-  // poblar datalist productos seguimiento
+  const clientes = (DB.clientes||[]).map(c=>
+    `<option value="${c.id}">👤 ${c.nombre}</option>`).join('');
+  const prospectos = (DB.prospectos||[])
+    .filter(p=>p.etapa!=='Cliente')
+    .map(p=>`<option value="${p.id}">🎯 ${p.nombre} (prospecto)</option>`).join('');
+  sel.innerHTML = '<option value="">— Elige un cliente o prospecto —</option>' +
+    (clientes ? `<optgroup label="Clientes">${clientes}</optgroup>` : '') +
+    (prospectos ? `<optgroup label="Prospectos">${prospectos}</optgroup>` : '');
   poblarDatalistProductos('lista-productos-seg');
 }
 
