@@ -884,8 +884,15 @@ tr:hover td { background: #FFFDF0; }
           </div>
           <div class="form-group full">
             <div class="form-label">Detalle de la interacción *</div>
-            <textarea class="form-textarea" id="int-nota" rows="3"
-              placeholder="Ej: Llamé para ofrecer pasta dental en el próximo pedido. Me dijo que no por ahora, volver a preguntar en 30 días cuando se le acabe la que tiene."></textarea>
+            <textarea class="form-textarea" id="int-nota" rows="5"
+              placeholder="Describe el contacto...&#10;&#10;Puedes usar:&#10;**negrita** para resaltar&#10;- guión para listas&#10;SUGERENCIA: para destacar una acción&#10;NOTA: para recordatorios"
+              style="font-size:12px;line-height:1.6"></textarea>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:3px">
+              Formato: <code style="background:var(--bg);padding:1px 4px;border-radius:3px">**negrita**</code>
+              · <code style="background:var(--bg);padding:1px 4px;border-radius:3px">*cursiva*</code>
+              · <code style="background:var(--bg);padding:1px 4px;border-radius:3px">- lista</code>
+              · <code style="background:var(--bg);padding:1px 4px;border-radius:3px">SUGERENCIA:</code>
+            </div>
           </div>
         </div>
         <div class="form-actions">
@@ -2128,6 +2135,37 @@ function poblarSelectClientes() {
   poblarDatalistProductos('lista-productos-seg');
 }
 
+// ── Formatea el texto de una nota con negrita, listas y saltos de línea ──
+function formatearNota(texto) {
+  if (!texto) return '';
+  // Escapar HTML primero
+  let t = texto
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+
+  // **negrita**
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // *cursiva*
+  t = t.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // Líneas con - o • → lista con viñeta
+  t = t.replace(/^[\-•]\s+(.+)$/gm,
+    '<span style="display:block;padding-left:12px">• $1</span>');
+
+  // Palabras clave resaltadas al inicio de línea
+  t = t.replace(/^(SUGERENCIA|NOTA|IMPORTANTE|RECORDAR|ACCIÓN|RESULTADO):/gm,
+    '<span style="display:inline-block;background:var(--gold-light);color:#7A5C00;font-weight:700;' +
+    'padding:1px 7px;border-radius:4px;margin-bottom:2px;font-size:11px">$1:</span>');
+
+  // Saltos de línea → <br> para que se vean los párrafos
+  // Doble salto → separación mayor entre párrafos
+  t = t.replace(/\n\n/g, '<br><br>');
+  t = t.replace(/\n/g, '<br>');
+
+  return t;
+}
+
 // ── Tipos de interacción ──
 const TIPOS_INT = {
   llamada:      { icon:'📞', color:'var(--blue)',       label:'Llamada' },
@@ -2213,7 +2251,7 @@ function verSeguimiento() {
               <span class="badge" style="font-size:9px;background:#F0EDE4;color:var(--dark)">${t.icon} ${t.label}</span>
               <span class="badge" style="font-size:9px;background:${r.bg};color:${r.color}">${r.text}</span>
             </div>
-            <div class="tl-text" style="margin-top:4px;line-height:1.6">${item.nota||''}</div>
+            <div class="tl-text" style="margin-top:4px;line-height:1.7;word-break:break-word">${formatearNota(item.nota||'')}</div>
             ${recLabel}
           </div>
           <button onclick="eliminarRegistro('interaccion','${item.id}')" style="background:none;border:none;color:var(--text-hint);cursor:pointer;font-size:12px;padding:2px 6px" title="Eliminar">✕</button>
